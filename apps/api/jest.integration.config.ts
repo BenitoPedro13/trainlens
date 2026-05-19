@@ -14,6 +14,8 @@ const config: Config = {
   testEnvironmentOptions: {},
   moduleNameMapper: {
     '^@trainlens/shared$': '<rootDir>/../../../packages/shared/src/index.ts',
+    // Strip .js from relative imports so ts-jest resolves the .ts source
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   setupFiles: ['<rootDir>/../test/setup-testcontainers.ts'],
 };

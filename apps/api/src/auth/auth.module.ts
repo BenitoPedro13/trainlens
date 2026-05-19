@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { AuthController } from './auth.controller.js';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
       signOptions: { algorithm: 'HS256' },
     }),
   ],
+  controllers: [AuthController],
   providers: [JwtStrategy, JwtAuthGuard],
   exports: [JwtAuthGuard, JwtModule],
 })
