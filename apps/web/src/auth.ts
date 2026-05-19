@@ -115,32 +115,50 @@ const config: NextAuthConfig = {
     // ── signIn ────────────────────────────────────────────────────────────────
     // After Strava OAuth, find-or-create the User in the DB (JWT strategy does
     // not persist users automatically), then store encrypted tokens.
+    // Identification is done via externalAthleteId because Strava does not
+    // reliably expose email in the OAuth profile.
     // user.id is overwritten with the real DB CUID so the jwt callback picks it up.
     async signIn({ user, account, profile }) {
       if (account?.provider === 'strava') {
-        if (!user.email) return false;
-
         const stravaProfile = profile as Record<string, unknown>;
         const athleteId =
           typeof stravaProfile['id'] === 'number' ? String(stravaProfile['id']) : null;
 
-        const dbUser = await prisma.user.upsert({
-          where: { email: user.email },
-          update: {
-            ...(user.name != null && { name: user.name }),
-            ...(user.image != null && { image: user.image }),
-          },
-          create: {
-            email: user.email,
-            name: user.name ?? null,
-            image: user.image ?? null,
-          },
+        if (!athleteId) return false;
+
+        // Re-login: find existing user via the Connection row.
+        const existing = await prisma.connection.findFirst({
+          where: { provider: 'strava', externalAthleteId: athleteId },
+          select: { userId: true },
         });
 
-        user.id = dbUser.id;
+        let dbUserId: string;
+
+        if (existing) {
+          dbUserId = existing.userId;
+        } else {
+          // First login: create a User row.
+          // Strava doesn't always expose email, so fall back to a synthetic one.
+          const email = user.email ?? `strava-${athleteId}@trainlens.local`;
+          const dbUser = await prisma.user.upsert({
+            where: { email },
+            update: {
+              ...(user.name != null && { name: user.name }),
+              ...(user.image != null && { image: user.image }),
+            },
+            create: {
+              email,
+              name: user.name ?? null,
+              image: user.image ?? null,
+            },
+          });
+          dbUserId = dbUser.id;
+        }
+
+        user.id = dbUserId;
 
         await upsertStravaConnection({
-          userId: dbUser.id,
+          userId: dbUserId,
           provider: 'strava',
           accessToken: account.access_token ?? '',
           refreshToken: account.refresh_token ?? '',
