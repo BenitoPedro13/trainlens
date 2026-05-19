@@ -23,6 +23,6 @@ const isDev = process.env['NODE_ENV'] !== 'production';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(requestIdMiddleware).forRoutes('*path');
+    consumer.apply(requestIdMiddleware).forRoutes('(.*)');
   }
 }
