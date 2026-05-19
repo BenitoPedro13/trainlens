@@ -164,22 +164,16 @@ cp .env.example .env
 # Edit .env with your local values (Strava, encryption key, etc.)
 ```
 
-### 3. Start infrastructure
+### 3. Start infrastructure + database
 
 ```bash
-docker compose -f infra/docker-compose.yml up -d
+pnpm db:setup
 ```
 
-This starts PostgreSQL (TimescaleDB), Redis, and related services.
+This starts Docker (PostgreSQL/TimescaleDB + Redis), applies migrations, and configures
+the TimescaleDB hypertable — all in one command.
 
-### 4. Database setup
-
-```bash
-pnpm --filter @trainlens/database db:migrate
-pnpm --filter @trainlens/database db:seed   # optional, when seed script exists
-```
-
-### 5. Run development servers
+### 4. Run development servers
 
 ```bash
 pnpm dev
