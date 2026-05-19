@@ -23,3 +23,13 @@ export type {
   HeartRateZone,
   TrainingLoad,
 } from './types/analytics.js';
+
+export {
+  encrypt,
+  decrypt,
+  serialize,
+  deserialize,
+  encryptToken,
+  decryptToken,
+} from './crypto/encryption.js';
+export type { TokenEncryptedPayload } from './crypto/encryption.js';
