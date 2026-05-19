@@ -2,37 +2,45 @@
 -- TimescaleDB hypertable setup for the Activity table.
 -- =============================================================================
 -- Context:
---   TimescaleDB requires the partition column (startedAt) to be part of every
---   unique constraint including the primary key. Prisma doesn't support composite
---   PKs for single-column @id fields, so we handle this in a raw SQL migration.
+--   TimescaleDB requires the partition column (startedAt) to be part of EVERY
+--   unique constraint including the primary key. Prisma schema keeps @id on
+--   `id` alone for ergonomic queries; we adjust the DB constraints here.
 --
--- Steps:
---   1. Drop the existing primary key on Activity (just the constraint, not the column)
---   2. Re-create it as a composite PK (id, startedAt)  
---   3. Update the unique constraint to include startedAt
---   4. Create the hypertable
+-- Side effects:
+--   - Activity PK becomes composite (id, startedAt) in the DB
+--   - The FK from ActivityRawPayload → Activity is removed (app-level integrity)
+--   - Unique constraint on (userId, provider, externalId) now includes startedAt
 --
--- Run AFTER: prisma migrate deploy (or prisma db push)
+-- Run AFTER: prisma migrate deploy (or prisma db push for dev)
 -- See ADR-002 for TimescaleDB design decisions.
 -- =============================================================================
 
--- Step 1: Drop the existing PK constraint
+BEGIN;
+
+-- Step 1: Remove FK that depends on Activity's simple PK
+ALTER TABLE "ActivityRawPayload" DROP CONSTRAINT IF EXISTS "ActivityRawPayload_activityId_fkey";
+
+-- Step 2: Drop the Prisma-generated single-column primary key
 ALTER TABLE "Activity" DROP CONSTRAINT IF EXISTS "Activity_pkey";
 
--- Step 2: Re-create as composite PK including the partition column
-ALTER TABLE "Activity" ADD CONSTRAINT "Activity_pkey" PRIMARY KEY (id, "startedAt");
+-- Step 3: Drop unique constraint that lacks the partition column
+DROP INDEX IF EXISTS "Activity_userId_provider_externalId_key";
 
--- Step 3: Update the unique constraint to include startedAt
-ALTER TABLE "Activity" DROP CONSTRAINT IF EXISTS "Activity_userId_provider_externalId_key";
-ALTER TABLE "Activity" ADD CONSTRAINT "Activity_userId_provider_externalId_startedAt_key"
-  UNIQUE ("userId", provider, "externalId", "startedAt");
-
--- Step 4: Create the hypertable (idempotent with if_not_exists)
+-- Step 4: Create the TimescaleDB hypertable on startedAt
 SELECT create_hypertable(
   '"Activity"',
   by_range('startedAt'),
   if_not_exists => TRUE
 );
+
+-- Step 5: Re-create PK as composite (required by TimescaleDB)
+ALTER TABLE "Activity" ADD CONSTRAINT "Activity_pkey" PRIMARY KEY (id, "startedAt");
+
+-- Step 6: Re-create unique constraint including the partition column
+CREATE UNIQUE INDEX IF NOT EXISTS "Activity_userId_provider_externalId_startedAt_key"
+  ON "Activity"("userId", provider, "externalId", "startedAt");
+
+COMMIT;
 
 -- Verify
 SELECT hypertable_name, num_dimensions
