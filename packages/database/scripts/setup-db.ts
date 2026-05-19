@@ -80,9 +80,9 @@ async function main() {
 
   // ── 3. Prisma migrations ───────────────────────────────────────────────────
   log('🗄️  Applying Prisma migrations...');
-  // Use the local prisma binary to avoid npx pulling a different version
-  const prismaBin = join(ROOT, 'node_modules/.bin/prisma');
-  run(`"${prismaBin}" migrate deploy --schema="${SCHEMA}"`);
+  // Run via pnpm exec to use the locally installed prisma version
+  const DB_PKG = join(ROOT, 'packages/database');
+  run(`pnpm exec prisma migrate deploy --schema="${SCHEMA}"`, { cwd: DB_PKG });
   log('✅ Migrations applied');
 
   // ── 4. TimescaleDB hypertable ──────────────────────────────────────────────
