@@ -2,7 +2,8 @@ import NextAuth, { type NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Strava from 'next-auth/providers/strava';
 import { prisma } from '@/lib/db';
-import { upsertStravaConnection } from '@/lib/connections';
+import { upsertStravaConnection, getStravaTokens } from '@/lib/connections';
+import { refreshStravaTokens, isTokenExpiringSoon } from '@/lib/strava-refresh';
 import { compare, hash } from 'bcryptjs';
 
 const config: NextAuthConfig = {
@@ -64,8 +65,44 @@ const config: NextAuthConfig = {
 
   callbacks: {
     // ── jwt ───────────────────────────────────────────────────────────────────
-    async jwt({ token, user }) {
+    // Runs on every session access. Refreshes Strava tokens when they are
+    // within 5 minutes of expiry.
+    async jwt({ token, user, account }) {
+      // First sign-in: propagate userId and initial Strava expiry.
       if (user?.id) token.sub = user.id;
+      if (account?.provider === 'strava' && account.expires_at) {
+        token.stravaExpiresAt = account.expires_at;
+      }
+
+      // Not a Strava session — nothing to refresh.
+      if (!token.stravaExpiresAt || !token.sub) return token;
+
+      // Token still valid → return as-is.
+      if (!isTokenExpiringSoon(token.stravaExpiresAt as number)) return token;
+
+      // Token expiring soon → refresh.
+      try {
+        const stored = await getStravaTokens(token.sub);
+        if (!stored?.refreshToken) return token;
+
+        const refreshed = await refreshStravaTokens(stored.refreshToken);
+
+        // Persist new tokens encrypted.
+        await upsertStravaConnection({
+          userId: token.sub,
+          provider: 'strava',
+          accessToken: refreshed.accessToken,
+          refreshToken: refreshed.refreshToken,
+          expiresAt: refreshed.expiresAt,
+          stravaAthleteId: null,
+        });
+
+        token.stravaExpiresAt = refreshed.expiresAt;
+      } catch (err) {
+        // Log and return stale token rather than breaking the session.
+        console.error('[auth] Strava token refresh failed:', err);
+      }
+
       return token;
     },
 
@@ -76,7 +113,7 @@ const config: NextAuthConfig = {
     },
 
     // ── signIn ────────────────────────────────────────────────────────────────
-    // After Strava OAuth, persist (encrypted in task 1.4) tokens to Connection.
+    // After Strava OAuth, persist encrypted tokens to the Connection table.
     async signIn({ user, account, profile }) {
       if (account?.provider === 'strava') {
         const userId = user.id;

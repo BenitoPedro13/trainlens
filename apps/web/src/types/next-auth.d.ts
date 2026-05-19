@@ -7,3 +7,10 @@ declare module 'next-auth' {
     };
   }
 }
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    /** Unix timestamp (seconds) when the Strava access token expires. */
+    stravaExpiresAt?: number;
+  }
+}
