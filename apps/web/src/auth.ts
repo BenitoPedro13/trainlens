@@ -113,18 +113,34 @@ const config: NextAuthConfig = {
     },
 
     // ── signIn ────────────────────────────────────────────────────────────────
-    // After Strava OAuth, persist encrypted tokens to the Connection table.
+    // After Strava OAuth, find-or-create the User in the DB (JWT strategy does
+    // not persist users automatically), then store encrypted tokens.
+    // user.id is overwritten with the real DB CUID so the jwt callback picks it up.
     async signIn({ user, account, profile }) {
       if (account?.provider === 'strava') {
-        const userId = user.id;
-        if (!userId) return false;
+        if (!user.email) return false;
 
         const stravaProfile = profile as Record<string, unknown>;
         const athleteId =
           typeof stravaProfile['id'] === 'number' ? String(stravaProfile['id']) : null;
 
+        const dbUser = await prisma.user.upsert({
+          where: { email: user.email },
+          update: {
+            ...(user.name != null && { name: user.name }),
+            ...(user.image != null && { image: user.image }),
+          },
+          create: {
+            email: user.email,
+            name: user.name ?? null,
+            image: user.image ?? null,
+          },
+        });
+
+        user.id = dbUser.id;
+
         await upsertStravaConnection({
-          userId,
+          userId: dbUser.id,
           provider: 'strava',
           accessToken: account.access_token ?? '',
           refreshToken: account.refresh_token ?? '',
