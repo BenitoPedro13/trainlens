@@ -16,9 +16,7 @@ export default function HomePage() {
           <h1 className="text-5xl font-bold tracking-tight text-white">TrainLens</h1>
         </div>
 
-        <p className="mt-2 text-xl text-brand-200">
-          Free, multi-source fitness analytics platform
-        </p>
+        <p className="mt-2 text-xl text-brand-200">Free, multi-source fitness analytics platform</p>
         <p className="mt-4 max-w-lg text-brand-300">
           Connect your Strava, Garmin, or Apple Health data and get meaningful insights —{' '}
           <span className="text-brand-400 font-medium">
