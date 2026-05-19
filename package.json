@@ -16,6 +16,8 @@
     "test:integration": "turbo run test:integration",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore",
+    "db:setup": "pnpm --filter @trainlens/database db:setup",
+    "db:setup:reset": "pnpm --filter @trainlens/database db:setup -- --reset",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:push": "turbo run db:push",
