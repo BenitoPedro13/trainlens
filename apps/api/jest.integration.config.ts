@@ -5,11 +5,17 @@ const config: Config = {
   rootDir: 'src',
   testRegex: '.*\\.integration\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest',
   },
   testEnvironment: 'node',
-  testTimeout: 60000,
+  testTimeout: 90000,
   maxWorkers: 1,
+  globalSetup: undefined,
+  testEnvironmentOptions: {},
+  moduleNameMapper: {
+    '^@trainlens/shared$': '<rootDir>/../../../packages/shared/src/index.ts',
+  },
+  setupFiles: ['<rootDir>/../test/setup-testcontainers.ts'],
 };
 
 export default config;
