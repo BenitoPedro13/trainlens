@@ -1,0 +1,211 @@
+// This is your Prisma schema file.
+// Learn more about it at: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Provider {
+  strava
+  garmin
+  apple_health
+  polar
+}
+
+enum ConnectionStatus {
+  active
+  paused
+  revoked
+  error
+}
+
+enum ActivityType {
+  Run
+  Ride
+  Swim
+  Walk
+  Hike
+  VirtualRide
+  VirtualRun
+  WeightTraining
+  Yoga
+  Workout
+  CrossFit
+  Rowing
+  StandUpPaddling
+  Kayaking
+  Skiing
+  Snowboard
+  Golf
+  Soccer
+  Tennis
+  Other
+}
+
+enum WebhookEventStatus {
+  pending
+  processing
+  completed
+  failed
+  skipped
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  connections        Connection[]
+  activities         Activity[]
+  dailyMetrics       DailyMetrics[]
+  webhookEvents      WebhookEvent[]
+
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Connection {
+  id                  String           @id @default(cuid())
+  userId              String
+  provider            Provider
+  externalAthleteId   String
+  status              ConnectionStatus @default(active)
+  scope               String
+
+  // Encrypted tokens (see ADR-011: envelope encryption)
+  encryptedAccessToken  String
+  encryptedRefreshToken String?
+  tokenExpiresAt        DateTime?
+
+  lastSyncedAt       DateTime?
+  syncErrorMessage   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider, status])
+}
+
+model Activity {
+  id           String       @id @default(cuid())
+  userId       String
+  connectionId String
+  externalId   String
+  provider     Provider
+
+  name        String
+  description String?
+  activityType ActivityType
+
+  startedAt       DateTime
+  durationSeconds Int
+  timezone        String?
+
+  distanceMeters        Float?
+  elevationGainMeters   Float?
+  elevationLossMeters   Float?
+
+  averageHeartRate        Int?
+  maxHeartRate            Int?
+  averagePaceSecondsPerKm Float?
+  averagePowerWatts       Float?
+  normalizedPowerWatts    Float?
+  maxPowerWatts           Float?
+  averageCadence          Float?
+  calories                Int?
+
+  startLatitude   Float?
+  startLongitude  Float?
+  endLatitude     Float?
+  endLongitude    Float?
+  summaryPolyline String?
+
+  deviceName String?
+  manual     Boolean @default(false)
+
+  tss Float?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connection Connection         @relation(fields: [connectionId], references: [id])
+  rawPayload ActivityRawPayload?
+
+  @@unique([userId, provider, externalId])
+  @@index([userId, startedAt(sort: Desc)])
+  @@index([userId, activityType])
+  @@index([connectionId])
+  @@index([deletedAt])
+}
+
+model ActivityRawPayload {
+  id         String   @id @default(cuid())
+  activityId String   @unique
+  provider   Provider
+  payload    Json
+  capturedAt DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}
+
+model DailyMetrics {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime @db.Date
+
+  totalActivities     Int   @default(0)
+  totalDistanceMeters Float @default(0)
+  totalDurationSeconds Int  @default(0)
+  totalElevationGainMeters Float @default(0)
+  totalCalories       Int   @default(0)
+  tss                 Float @default(0)
+
+  ctl Float?
+  atl Float?
+  tsb Float?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+}
+
+model WebhookEvent {
+  id        String             @id @default(cuid())
+  userId    String?
+  provider  Provider
+  eventType String
+  externalId String?
+  objectType String?
+  status    WebhookEventStatus @default(pending)
+
+  payload     Json
+  errorMessage String?
+  attempts    Int      @default(0)
+
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([provider, status])
+  @@index([userId])
+  @@index([externalId, provider])
+  @@index([receivedAt(sort: Desc)])
+}
