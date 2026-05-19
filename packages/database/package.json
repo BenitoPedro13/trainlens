@@ -17,13 +17,16 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:setup": "ts-node --esm scripts/setup-db.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "prisma": "^6.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.0"
   }
 }
