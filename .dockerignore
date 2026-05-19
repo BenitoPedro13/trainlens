@@ -1,0 +1,48 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build artifacts
+dist
+build
+.next
+out
+.turbo
+coverage
+test-results
+playwright-report
+
+# Git & docs (not needed in image)
+.git
+.gitignore
+*.md
+!README.md
+adrs
+docs
+.github
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# IDE & OS
+.idea
+.vscode
+.DS_Store
+*.log
+
+# Tests & dev tooling
+**/*.spec.ts
+**/*.test.ts
+**/*.integration.ts
+**/e2e
+**/__tests__
+**/__mocks__
+**/fixtures
+
+# Local data volumes
+pgdata
+redisdata
+infra/pgdata
+infra/redisdata
