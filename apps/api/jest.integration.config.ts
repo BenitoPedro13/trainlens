@@ -5,7 +5,7 @@ const config: Config = {
   rootDir: 'src',
   testRegex: '.*\\.integration\\.ts$',
   transform: {
-    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/../tsconfig.test.json' }],
+    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/../tsconfig.json' }],
   },
   testEnvironment: 'node',
   testTimeout: 90000,
