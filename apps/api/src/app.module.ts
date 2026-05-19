@@ -4,6 +4,7 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { QueueModule } from './queue/queue.module';
+import { StravaModule } from './strava/strava.module';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import type { NestModule, MiddlewareConsumer } from '@nestjs/common';
 
@@ -22,6 +23,7 @@ const isDev = process.env['NODE_ENV'] !== 'production';
     DatabaseModule,
     AuthModule,
     QueueModule,
+    StravaModule,
     HealthModule,
   ],
 })
