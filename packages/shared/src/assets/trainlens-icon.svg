@@ -1,0 +1,65 @@
+<svg width="100%" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg" style="max-width: 680px; display: block; margin-inline: auto;">
+  <title>TrainLens app icon</title>
+  <desc>A square app icon with rounded corners for TrainLens, featuring a stylized lens with a performance curve inside</desc>
+
+  <defs>
+    <clipPath id="iconClip">
+      <rect x="90" y="90" width="500" height="500" rx="112"></rect>
+    </clipPath>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#085041"></stop>
+      <stop offset="100%" stop-color="#04342C"></stop>
+    </linearGradient>
+    <linearGradient id="lensGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5DCAA5" stop-opacity="0.18"></stop>
+      <stop offset="100%" stop-color="#5DCAA5" stop-opacity="0.05"></stop>
+    </linearGradient>
+    <linearGradient id="glowLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9FE1CB" stop-opacity="0"></stop>
+      <stop offset="30%" stop-color="#9FE1CB"></stop>
+      <stop offset="70%" stop-color="#5DCAA5"></stop>
+      <stop offset="100%" stop-color="#5DCAA5" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="dotGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9FE1CB"></stop>
+      <stop offset="100%" stop-color="#5DCAA5"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect x="90" y="90" width="500" height="500" rx="112" fill="url(#bgGrad)"></rect>
+
+  <g clip-path="url(#iconClip)">
+    <rect x="90" y="90" width="500" height="500" rx="112" fill="url(#bgGrad)"></rect>
+
+    <ellipse cx="340" cy="340" rx="195" ry="195" fill="none" stroke="#1D9E75" stroke-width="0.5" opacity="0.3"></ellipse>
+    <ellipse cx="340" cy="340" rx="155" ry="155" fill="none" stroke="#1D9E75" stroke-width="0.5" opacity="0.2"></ellipse>
+
+    <path d="M145 340 Q220 310 280 340 Q340 370 400 340 Q460 310 535 340" fill="none" stroke="#1D9E75" stroke-width="0.5" opacity="0.25"></path>
+    <path d="M145 400 Q220 370 280 400 Q340 430 400 400 Q460 370 535 400" fill="none" stroke="#1D9E75" stroke-width="0.5" opacity="0.15"></path>
+    <path d="M145 280 Q220 250 280 280 Q340 310 400 280 Q460 250 535 280" fill="none" stroke="#1D9E75" stroke-width="0.5" opacity="0.15"></path>
+
+    <path d="M140 340 C200 340 220 340 260 340 C300 340 300 340 340 340 C380 340 380 340 420 340 C460 340 480 340 540 340" fill="none" stroke="#0F6E56" stroke-width="40" opacity="0.12"></path>
+
+    <path d="M150 340 C190 340 210 340 250 340 C290 340 300 340 340 340 C380 340 390 340 430 340 C470 340 490 340 530 340" fill="url(#lensGrad)" stroke="#5DCAA5" stroke-width="52" opacity="0.08"></path>
+
+    <path d="M150 340 C200 340 270 340 340 340 C410 340 480 340 530 340" fill="none" stroke="#1D9E75" stroke-width="1" stroke-dasharray="4 8" opacity="0.3"></path>
+
+    <path d="M190 388 C220 375 248 358 268 344 C295 325 310 315 340 310 C365 310 380 318 400 330 C420 342 440 348 458 342 C468 339 476 334 490 326" fill="none" stroke="url(#glowLine)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <path d="M190 388 C220 375 248 358 268 344 C295 325 310 315 340 310 C365 310 380 318 400 330 C420 342 440 348 458 342 C468 339 476 334 490 326
+             L490 420 L190 420 Z" fill="#5DCAA5" opacity="0.07"></path>
+
+    <circle cx="340" cy="310" r="6" fill="url(#dotGlow)"></circle>
+    <circle cx="340" cy="310" r="11" fill="#5DCAA5" opacity="0.15"></circle>
+
+    <circle cx="490" cy="326" r="4.5" fill="#9FE1CB"></circle>
+    <circle cx="190" cy="388" r="4" fill="#5DCAA5" opacity="0.6"></circle>
+
+    <path d="M140 340 C205 295 270 340 340 340 C410 340 475 295 540 340 C475 385 410 340 340 340 C270 340 205 385 140 340 Z" fill="none" stroke="#5DCAA5" stroke-width="1.5" opacity="0.45"></path>
+
+    <circle cx="340" cy="340" r="16" fill="none" stroke="#9FE1CB" stroke-width="1.2" opacity="0.5"></circle>
+    <circle cx="340" cy="340" r="5" fill="#9FE1CB" opacity="0.7"></circle>
+  </g>
+
+  <rect x="90" y="90" width="500" height="500" rx="112" fill="none" stroke="#1D9E75" stroke-width="1" opacity="0.4"></rect>
+</svg>
