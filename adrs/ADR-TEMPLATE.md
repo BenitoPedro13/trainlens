@@ -14,20 +14,23 @@ What is the change that we're proposing and/or doing?
 
 ## Options Considered
 
-| Option | Pros | Cons |
-|--------|------|------|
-| **Option A** ✅ | ... | ... |
-| **Option B** | ... | ... |
+| Option          | Pros | Cons |
+| --------------- | ---- | ---- |
+| **Option A** ✅ | ...  | ...  |
+| **Option B**    | ...  | ...  |
 
 ## Consequences
 
 ### Positive
+
 - ...
 
 ### Negative
+
 - ...
 
 ### Risks
+
 - ...
 
 ## References

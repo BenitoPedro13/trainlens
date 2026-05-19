@@ -42,14 +42,14 @@
 
 ### Planned Analytics
 
-| Category | Examples |
-|----------|----------|
-| **Training load** | CTL / ATL / TSB (Performance Management Chart), weekly TSS, monotony, acute:chronic ratio |
-| **Volume & consistency** | Activity heatmap, streaks, sport distribution, year-over-year |
-| **Performance** | Best efforts, pace/power histograms, HR zones, VO₂max trend, critical power |
-| **Recovery & patterns** | Rest-day distribution, time-of-day heatmap, post-race recovery |
-| **Geo & routes** | GPS heatmap, route clustering, elevation archives |
-| **Advanced** | Fitness age, race time predictor, training plan adherence, milestones |
+| Category                 | Examples                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| **Training load**        | CTL / ATL / TSB (Performance Management Chart), weekly TSS, monotony, acute:chronic ratio |
+| **Volume & consistency** | Activity heatmap, streaks, sport distribution, year-over-year                             |
+| **Performance**          | Best efforts, pace/power histograms, HR zones, VO₂max trend, critical power               |
+| **Recovery & patterns**  | Rest-day distribution, time-of-day heatmap, post-race recovery                            |
+| **Geo & routes**         | GPS heatmap, route clustering, elevation archives                                         |
+| **Advanced**             | Fitness age, race time predictor, training plan adherence, milestones                     |
 
 ---
 
@@ -94,18 +94,18 @@ For the full design document, see [`adrs/ARCHITECTURE_DESIGN_BASE.md`](adrs/ARCH
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Monorepo** | [Turborepo](https://turbo.build/) + [pnpm](https://pnpm.io/) workspaces |
-| **Web** | [Next.js 14](https://nextjs.org/) (App Router), [TanStack Query](https://tanstack.com/query), [Auth.js](https://authjs.dev/) |
-| **API** | [NestJS](https://nestjs.com/), REST `/api/v1/`, JWT guards |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) + [TimescaleDB](https://www.timescale.com/) |
-| **ORM** | [Prisma](https://www.prisma.io/) (`packages/database`) |
-| **Jobs & cache** | [BullMQ](https://docs.bullmq.io/) + [Redis](https://redis.io/) |
-| **Charts** | [Recharts](https://recharts.org/) + [D3.js](https://d3js.org/) (selective) |
-| **Observability** | [Pino](https://getpino.io/), [Sentry](https://sentry.io/), [Bull Board](https://github.com/felixmosh/bull-board) |
-| **Infra (local)** | Docker Compose |
-| **Testing** | Jest, Testcontainers, Playwright, nock/msw |
+| Layer             | Technology                                                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Monorepo**      | [Turborepo](https://turbo.build/) + [pnpm](https://pnpm.io/) workspaces                                                      |
+| **Web**           | [Next.js 14](https://nextjs.org/) (App Router), [TanStack Query](https://tanstack.com/query), [Auth.js](https://authjs.dev/) |
+| **API**           | [NestJS](https://nestjs.com/), REST `/api/v1/`, JWT guards                                                                   |
+| **Database**      | [PostgreSQL](https://www.postgresql.org/) + [TimescaleDB](https://www.timescale.com/)                                        |
+| **ORM**           | [Prisma](https://www.prisma.io/) (`packages/database`)                                                                       |
+| **Jobs & cache**  | [BullMQ](https://docs.bullmq.io/) + [Redis](https://redis.io/)                                                               |
+| **Charts**        | [Recharts](https://recharts.org/) + [D3.js](https://d3js.org/) (selective)                                                   |
+| **Observability** | [Pino](https://getpino.io/), [Sentry](https://sentry.io/), [Bull Board](https://github.com/felixmosh/bull-board)             |
+| **Infra (local)** | Docker Compose                                                                                                               |
+| **Testing**       | Jest, Testcontainers, Playwright, nock/msw                                                                                   |
 
 ---
 
@@ -136,11 +136,11 @@ trainlens/
 
 ## Prerequisites
 
-| Tool | Version |
-|------|---------|
-| [Node.js](https://nodejs.org/) | ≥ 20 LTS |
-| [pnpm](https://pnpm.io/installation) | ≥ 9 |
-| [Docker](https://www.docker.com/) & Docker Compose | Latest (for PostgreSQL, Redis, local stack) |
+| Tool                                                     | Version                                         |
+| -------------------------------------------------------- | ----------------------------------------------- |
+| [Node.js](https://nodejs.org/)                           | ≥ 20 LTS                                        |
+| [pnpm](https://pnpm.io/installation)                     | ≥ 9                                             |
+| [Docker](https://www.docker.com/) & Docker Compose       | Latest (for PostgreSQL, Redis, local stack)     |
 | [Strava API](https://developers.strava.com/) credentials | For OAuth and webhooks (when implementing sync) |
 
 ---
@@ -185,12 +185,12 @@ pnpm --filter @trainlens/database db:seed   # optional, when seed script exists
 pnpm dev
 ```
 
-| Service | URL |
-|---------|-----|
-| Web (Next.js) | http://localhost:3000 |
-| API (NestJS) | http://localhost:3001 |
-| Bull Board | http://localhost:3002 |
-| Health check | http://localhost:3001/health |
+| Service       | URL                          |
+| ------------- | ---------------------------- |
+| Web (Next.js) | http://localhost:3000        |
+| API (NestJS)  | http://localhost:3001        |
+| Bull Board    | http://localhost:3002        |
+| Health check  | http://localhost:3001/health |
 
 ---
 
@@ -198,15 +198,15 @@ pnpm dev
 
 Copy [`.env.example`](.env.example) to `.env` at the repository root. Key groups:
 
-| Group | Variables |
-|-------|-----------|
-| **Database** | `DATABASE_URL` |
-| **Redis** | `REDIS_URL` |
-| **Strava** | `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_WEBHOOK_VERIFY_TOKEN` |
-| **Auth** | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `JWT_SECRET` |
-| **Encryption** | `TOKEN_ENCRYPTION_KEY` (master KEK for OAuth tokens) |
-| **Observability** | `SENTRY_DSN` |
-| **App** | `NEXT_PUBLIC_API_URL` |
+| Group             | Variables                                                                 |
+| ----------------- | ------------------------------------------------------------------------- |
+| **Database**      | `DATABASE_URL`                                                            |
+| **Redis**         | `REDIS_URL`                                                               |
+| **Strava**        | `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_WEBHOOK_VERIFY_TOKEN` |
+| **Auth**          | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `JWT_SECRET`                           |
+| **Encryption**    | `TOKEN_ENCRYPTION_KEY` (master KEK for OAuth tokens)                      |
+| **Observability** | `SENTRY_DSN`                                                              |
+| **App**           | `NEXT_PUBLIC_API_URL`                                                     |
 
 Never commit `.env` or secrets. See [ADR-011](adrs/ADR-011.md) for token encryption details.
 
@@ -244,13 +244,13 @@ Implement the `FitnessProvider` interface in `packages/shared` and register a Ne
 
 Strategy defined in [ADR-015](adrs/ADR-015.md):
 
-| Layer | Tool | Scope |
-|-------|------|-------|
-| Unit | Jest | Analytics formulas, normalization, domain utilities |
-| Integration | Jest + Testcontainers | API, DB, BullMQ, webhook idempotency |
-| Adapter | Jest + nock/msw | Strava HTTP fixtures (no live API in CI) |
-| E2E | Playwright | Login, connect, dashboard, settings |
-| Contract | TypeScript `strict` | Shared types across packages |
+| Layer       | Tool                  | Scope                                               |
+| ----------- | --------------------- | --------------------------------------------------- |
+| Unit        | Jest                  | Analytics formulas, normalization, domain utilities |
+| Integration | Jest + Testcontainers | API, DB, BullMQ, webhook idempotency                |
+| Adapter     | Jest + nock/msw       | Strava HTTP fixtures (no live API in CI)            |
+| E2E         | Playwright            | Login, connect, dashboard, settings                 |
+| Contract    | TypeScript `strict`   | Shared types across packages                        |
 
 Target CI pipeline: **under 5 minutes** for lint, typecheck, unit, adapter, integration, and E2E.
 
@@ -264,35 +264,35 @@ Target CI pipeline: **under 5 minutes** for lint, typecheck, unit, adapter, inte
 
 Example endpoints (planned):
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/activities` | List user activities |
-| `GET` | `/api/v1/analytics/daily-metrics` | Pre-aggregated daily stats |
-| `POST` | `/api/v1/webhooks/strava` | Strava webhook receiver |
-| `GET` | `/health` | DB, Redis, queue health |
+| Method | Path                              | Description                |
+| ------ | --------------------------------- | -------------------------- |
+| `GET`  | `/api/v1/activities`              | List user activities       |
+| `GET`  | `/api/v1/analytics/daily-metrics` | Pre-aggregated daily stats |
+| `POST` | `/api/v1/webhooks/strava`         | Strava webhook receiver    |
+| `GET`  | `/health`                         | DB, Redis, queue health    |
 
 ---
 
 ## Security & Privacy
 
-| Concern | Mitigation |
-|---------|------------|
-| OAuth tokens | AES-256-GCM envelope encryption ([ADR-011](adrs/ADR-011.md)) |
-| API access | Short-lived JWTs; all queries scoped by `userId` |
-| Webhooks | Verify token + idempotency log ([ADR-013](adrs/ADR-013.md)) |
-| Rate limiting | `@nestjs/throttler` on API; BullMQ limiter for Strava |
-| GDPR | Soft delete (30-day grace), data export, cascading hard delete ([ADR-014](adrs/ADR-014.md)) |
+| Concern       | Mitigation                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| OAuth tokens  | AES-256-GCM envelope encryption ([ADR-011](adrs/ADR-011.md))                                |
+| API access    | Short-lived JWTs; all queries scoped by `userId`                                            |
+| Webhooks      | Verify token + idempotency log ([ADR-013](adrs/ADR-013.md))                                 |
+| Rate limiting | `@nestjs/throttler` on API; BullMQ limiter for Strava                                       |
+| GDPR          | Soft delete (30-day grace), data export, cascading hard delete ([ADR-014](adrs/ADR-014.md)) |
 
 ---
 
 ## Roadmap
 
-| Phase | Focus |
-|-------|--------|
-| **1 — MVP** | Monorepo, auth, Strava sync, basic dashboard, account settings |
-| **2 — Analytics** | CTL/ATL/TSB, best efforts, HR zones, YoY comparison |
-| **3 — Geo** | Activity heatmap, route clustering, elevation |
-| **4 — Multi-source** | Garmin, Apple Health, Polar, deduplication |
+| Phase                | Focus                                                           |
+| -------------------- | --------------------------------------------------------------- |
+| **1 — MVP**          | Monorepo, auth, Strava sync, basic dashboard, account settings  |
+| **2 — Analytics**    | CTL/ATL/TSB, best efforts, HR zones, YoY comparison             |
+| **3 — Geo**          | Activity heatmap, route clustering, elevation                   |
+| **4 — Multi-source** | Garmin, Apple Health, Polar, deduplication                      |
 | **5 — Intelligence** | Race predictor, training plans, anomaly detection, digest email |
 
 Detailed checklist: [`adrs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap`](adrs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap).
@@ -303,23 +303,23 @@ Detailed checklist: [`adrs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap`](adrs/
 
 All significant technical decisions are documented as ADRs in [`adrs/`](adrs/):
 
-| ADR | Title |
-|-----|-------|
-| [001](adrs/ADR-001.md) | Monorepo: Turborepo + pnpm |
+| ADR                    | Title                              |
+| ---------------------- | ---------------------------------- |
+| [001](adrs/ADR-001.md) | Monorepo: Turborepo + pnpm         |
 | [002](adrs/ADR-002.md) | Database: PostgreSQL + TimescaleDB |
-| [003](adrs/ADR-003.md) | ORM: Prisma |
-| [004](adrs/ADR-004.md) | Background jobs: BullMQ + Redis |
-| [005](adrs/ADR-005.md) | Auth: Auth.js + NestJS JWT |
-| [006](adrs/ADR-006.md) | Adapter architecture |
-| [007](adrs/ADR-007.md) | Frontend data fetching |
-| [008](adrs/ADR-008.md) | Charts: Recharts + D3 |
-| [009](adrs/ADR-009.md) | Observability |
-| [010](adrs/ADR-010.md) | Raw activity storage |
-| [011](adrs/ADR-011.md) | Token & key management |
-| [012](adrs/ADR-012.md) | API versioning |
-| [013](adrs/ADR-013.md) | Webhook idempotency |
-| [014](adrs/ADR-014.md) | Data lifecycle & GDPR |
-| [015](adrs/ADR-015.md) | Testing strategy |
+| [003](adrs/ADR-003.md) | ORM: Prisma                        |
+| [004](adrs/ADR-004.md) | Background jobs: BullMQ + Redis    |
+| [005](adrs/ADR-005.md) | Auth: Auth.js + NestJS JWT         |
+| [006](adrs/ADR-006.md) | Adapter architecture               |
+| [007](adrs/ADR-007.md) | Frontend data fetching             |
+| [008](adrs/ADR-008.md) | Charts: Recharts + D3              |
+| [009](adrs/ADR-009.md) | Observability                      |
+| [010](adrs/ADR-010.md) | Raw activity storage               |
+| [011](adrs/ADR-011.md) | Token & key management             |
+| [012](adrs/ADR-012.md) | API versioning                     |
+| [013](adrs/ADR-013.md) | Webhook idempotency                |
+| [014](adrs/ADR-014.md) | Data lifecycle & GDPR              |
+| [015](adrs/ADR-015.md) | Testing strategy                   |
 
 Use [`adrs/ADR-TEMPLATE.md`](adrs/ADR-TEMPLATE.md) for new decisions.
 

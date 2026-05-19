@@ -27,60 +27,60 @@ These are organized by insight depth, from simple glance metrics to advanced coa
 
 ### 2.1 Training Load & Fitness
 
-| Metric | Description | Why Athletes Love It |
-|--------|-------------|----------------------|
-| **CTL / ATL / TSB (Fitness/Fatigue/Form)** | Chronic Training Load, Acute Training Load, Training Stress Balance (the "Performance Management Chart") | Industry standard for periodization |
-| **Weekly TSS trend** | Training Stress Score over rolling weeks | Shows whether training is progressive or chaotic |
-| **Training monotony** | Ratio of average to std dev of daily load | High monotony = injury risk |
-| **Acute:Chronic ratio** | If A:C > 1.5, injury risk spikes | Actionable safety alert |
+| Metric                                     | Description                                                                                              | Why Athletes Love It                             |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **CTL / ATL / TSB (Fitness/Fatigue/Form)** | Chronic Training Load, Acute Training Load, Training Stress Balance (the "Performance Management Chart") | Industry standard for periodization              |
+| **Weekly TSS trend**                       | Training Stress Score over rolling weeks                                                                 | Shows whether training is progressive or chaotic |
+| **Training monotony**                      | Ratio of average to std dev of daily load                                                                | High monotony = injury risk                      |
+| **Acute:Chronic ratio**                    | If A:C > 1.5, injury risk spikes                                                                         | Actionable safety alert                          |
 
 ### 2.2 Volume & Consistency
 
-| Metric | Description |
-|--------|-------------|
-| **Activity heatmap calendar** | GitHub-style contribution graph by day |
-| **Weekly/monthly distance & elevation** | Bar chart with rolling average overlay |
-| **Streak tracking** | Longest streak, current streak, near-miss detection |
-| **Sport distribution** | Donut chart: % run vs ride vs swim vs etc. |
-| **Year-over-year comparison** | Same week last year overlaid |
+| Metric                                  | Description                                         |
+| --------------------------------------- | --------------------------------------------------- |
+| **Activity heatmap calendar**           | GitHub-style contribution graph by day              |
+| **Weekly/monthly distance & elevation** | Bar chart with rolling average overlay              |
+| **Streak tracking**                     | Longest streak, current streak, near-miss detection |
+| **Sport distribution**                  | Donut chart: % run vs ride vs swim vs etc.          |
+| **Year-over-year comparison**           | Same week last year overlaid                        |
 
 ### 2.3 Performance & Progression
 
-| Metric | Description |
-|--------|-------------|
-| **Best efforts over time** | 400m, 1K, 1mi, 5K, 10K, half, full: line chart of PRs |
-| **Pace/Power distribution histogram** | Time spent in each zone |
-| **Heart rate zones pie** | % time in Z1-Z5 |
-| **VO₂max estimation trend** | Derived from HR + pace data |
-| **Critical Power / Functional Threshold Pace** | Modeled from best efforts |
-| **Fastest segments** | Personal leaderboard on repeated routes |
+| Metric                                         | Description                                           |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| **Best efforts over time**                     | 400m, 1K, 1mi, 5K, 10K, half, full: line chart of PRs |
+| **Pace/Power distribution histogram**          | Time spent in each zone                               |
+| **Heart rate zones pie**                       | % time in Z1-Z5                                       |
+| **VO₂max estimation trend**                    | Derived from HR + pace data                           |
+| **Critical Power / Functional Threshold Pace** | Modeled from best efforts                             |
+| **Fastest segments**                           | Personal leaderboard on repeated routes               |
 
 ### 2.4 Recovery & Patterns
 
-| Metric | Description |
-|--------|-------------|
-| **Rest day distribution** | Are you actually resting? Day-of-week analysis |
-| **Morning vs evening preference** | Hour-of-day heatmap |
-| **Longest gap between activities** | Useful for identifying detraining risks |
-| **Post-race recovery curve** | Load drop after big efforts |
+| Metric                             | Description                                    |
+| ---------------------------------- | ---------------------------------------------- |
+| **Rest day distribution**          | Are you actually resting? Day-of-week analysis |
+| **Morning vs evening preference**  | Hour-of-day heatmap                            |
+| **Longest gap between activities** | Useful for identifying detraining risks        |
+| **Post-race recovery curve**       | Load drop after big efforts                    |
 
 ### 2.5 Geo & Route Intelligence
 
-| Metric | Description |
-|--------|-------------|
-| **Activity heatmap (geo)** | Aggregated GPS overlay on a map (Leaflet/Mapbox) |
-| **Most frequent routes** | Clustered by start/end proximity |
-| **Elevation profile archive** | Per-activity and cumulative |
-| **Explore radius** | How far from home do you typically train? |
+| Metric                        | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| **Activity heatmap (geo)**    | Aggregated GPS overlay on a map (Leaflet/Mapbox) |
+| **Most frequent routes**      | Clustered by start/end proximity                 |
+| **Elevation profile archive** | Per-activity and cumulative                      |
+| **Explore radius**            | How far from home do you typically train?        |
 
 ### 2.6 Advanced / Gamified
 
-| Metric | Description |
-|--------|-------------|
-| **"Fitness age" score** | Compare your load profile to age-matched athletes |
-| **Predicted race times** | Riegel formula + HR-adjusted |
-| **Training plan adherence** | If user sets a target, % completion |
-| **Milestone achievements** | 1000km total, 100 activities, etc. |
+| Metric                      | Description                                       |
+| --------------------------- | ------------------------------------------------- |
+| **"Fitness age" score**     | Compare your load profile to age-matched athletes |
+| **Predicted race times**    | Riegel formula + HR-adjusted                      |
+| **Training plan adherence** | If user sets a target, % completion               |
+| **Milestone achievements**  | 1000km total, 100 activities, etc.                |
 
 ---
 
@@ -157,23 +157,23 @@ User connects Strava → OAuth2 PKCE flow → store tokens (encrypted)
 
 All ADRs are maintained as individual documents in the `/adrs/` directory.
 
-| ADR | Title | Status |
-|-----|-------|--------|
-| [ADR-001](adrs/ADR-001.md) | Monorepo Tooling: Turborepo + pnpm | Accepted |
-| [ADR-002](adrs/ADR-002.md) | Database: PostgreSQL + TimescaleDB | Accepted |
-| [ADR-003](adrs/ADR-003.md) | ORM: Prisma | Accepted |
-| [ADR-004](adrs/ADR-004.md) | Background Jobs: BullMQ + Redis | Accepted |
-| [ADR-005](adrs/ADR-005.md) | Authentication: Auth.js + NestJS JWT | Accepted |
-| [ADR-006](adrs/ADR-006.md) | Adapter Architecture: NestJS Modules + Shared Interface | Accepted |
+| ADR                        | Title                                                      | Status   |
+| -------------------------- | ---------------------------------------------------------- | -------- |
+| [ADR-001](adrs/ADR-001.md) | Monorepo Tooling: Turborepo + pnpm                         | Accepted |
+| [ADR-002](adrs/ADR-002.md) | Database: PostgreSQL + TimescaleDB                         | Accepted |
+| [ADR-003](adrs/ADR-003.md) | ORM: Prisma                                                | Accepted |
+| [ADR-004](adrs/ADR-004.md) | Background Jobs: BullMQ + Redis                            | Accepted |
+| [ADR-005](adrs/ADR-005.md) | Authentication: Auth.js + NestJS JWT                       | Accepted |
+| [ADR-006](adrs/ADR-006.md) | Adapter Architecture: NestJS Modules + Shared Interface    | Accepted |
 | [ADR-007](adrs/ADR-007.md) | Frontend Data Fetching: TanStack Query + Server Components | Accepted |
-| [ADR-008](adrs/ADR-008.md) | Charts & Visualization: Recharts + D3 | Accepted |
-| [ADR-009](adrs/ADR-009.md) | Observability: Pino + Sentry + Bull Board | Accepted |
-| [ADR-010](adrs/ADR-010.md) | Raw Activity Data Storage Strategy | Accepted |
-| [ADR-011](adrs/ADR-011.md) | Token & Key Management | Accepted |
-| [ADR-012](adrs/ADR-012.md) | API Versioning: URL Prefix Strategy | Accepted |
-| [ADR-013](adrs/ADR-013.md) | Webhook Reliability & Idempotency | Accepted |
-| [ADR-014](adrs/ADR-014.md) | Data Lifecycle, Deletion & GDPR Compliance | Accepted |
-| [ADR-015](adrs/ADR-015.md) | Testing Strategy | Accepted |
+| [ADR-008](adrs/ADR-008.md) | Charts & Visualization: Recharts + D3                      | Accepted |
+| [ADR-009](adrs/ADR-009.md) | Observability: Pino + Sentry + Bull Board                  | Accepted |
+| [ADR-010](adrs/ADR-010.md) | Raw Activity Data Storage Strategy                         | Accepted |
+| [ADR-011](adrs/ADR-011.md) | Token & Key Management                                     | Accepted |
+| [ADR-012](adrs/ADR-012.md) | API Versioning: URL Prefix Strategy                        | Accepted |
+| [ADR-013](adrs/ADR-013.md) | Webhook Reliability & Idempotency                          | Accepted |
+| [ADR-014](adrs/ADR-014.md) | Data Lifecycle, Deletion & GDPR Compliance                 | Accepted |
+| [ADR-015](adrs/ADR-015.md) | Testing Strategy                                           | Accepted |
 
 ---
 
@@ -347,6 +347,7 @@ model WebhookEvent {
 ## 7. Strava Integration Details
 
 ### OAuth Flow
+
 ```
 1. User clicks "Connect Strava"
 2. Next.js redirects to Strava OAuth with scope: activity:read_all
@@ -358,6 +359,7 @@ model WebhookEvent {
 ```
 
 ### Webhook Events (Strava push model, preferred over polling)
+
 ```
 POST /api/v1/webhooks/strava
 Payload: { object_type: 'activity', aspect_type: 'create', object_id: 12345, owner_id: 67890 }
@@ -369,15 +371,17 @@ Payload: { object_type: 'activity', aspect_type: 'create', object_id: 12345, own
 ```
 
 ### Supported Event Types
-| Event | Action |
-|-------|--------|
-| `activity.create` | Fetch full activity, normalize, persist, recalculate DailyMetrics |
-| `activity.update` | Re-fetch activity, update record, recalculate affected DailyMetrics |
-| `activity.delete` | Soft-delete activity, recalculate affected DailyMetrics |
-| `athlete.update` | Refresh athlete profile |
-| `athlete.deauthorize` | Revoke connection, clean up tokens |
+
+| Event                 | Action                                                              |
+| --------------------- | ------------------------------------------------------------------- |
+| `activity.create`     | Fetch full activity, normalize, persist, recalculate DailyMetrics   |
+| `activity.update`     | Re-fetch activity, update record, recalculate affected DailyMetrics |
+| `activity.delete`     | Soft-delete activity, recalculate affected DailyMetrics             |
+| `athlete.update`      | Refresh athlete profile                                             |
+| `athlete.deauthorize` | Revoke connection, clean up tokens                                  |
 
 ### Rate Limits
+
 - 100 requests / 15 min per user token
 - 1000 requests / day per user token
 - Use webhook push to avoid polling; bulk import must be throttled via BullMQ rate limiter
@@ -389,15 +393,16 @@ Payload: { object_type: 'activity', aspect_type: 'create', object_id: 12345, own
 
 > Full details in [ADR-009](adrs/ADR-009.md)
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| **Structured Logging** | Pino (NestJS) | JSON logs with request ID, user ID, correlation ID |
-| **Error Tracking** | Sentry | Exception capture with context, source maps for frontend |
-| **Job Monitoring** | Bull Board | Dashboard for queue health, failed jobs, retry status |
-| **Health Checks** | NestJS Terminus | `/health` endpoint: DB, Redis, queue connectivity |
-| **Metrics (Phase 2+)** | Prometheus + Grafana | API latency, sync throughput, error rates |
+| Layer                  | Tool                 | Purpose                                                  |
+| ---------------------- | -------------------- | -------------------------------------------------------- |
+| **Structured Logging** | Pino (NestJS)        | JSON logs with request ID, user ID, correlation ID       |
+| **Error Tracking**     | Sentry               | Exception capture with context, source maps for frontend |
+| **Job Monitoring**     | Bull Board           | Dashboard for queue health, failed jobs, retry status    |
+| **Health Checks**      | NestJS Terminus      | `/health` endpoint: DB, Redis, queue connectivity        |
+| **Metrics (Phase 2+)** | Prometheus + Grafana | API latency, sync throughput, error rates                |
 
 ### Error Handling Strategy
+
 - **Global exception filter** in NestJS catches all unhandled errors, logs them with context, reports to Sentry
 - **BullMQ workers** use exponential backoff: 3 retries with delays of 30s, 2min, 10min
 - **Dead letter queue** captures permanently failed jobs for manual inspection
@@ -424,12 +429,12 @@ services:
     image: timescale/timescaledb:latest-pg16
     environment:
       POSTGRES_DB: fitness_analytics
-    ports: ["5432:5432"]
+    ports: ['5432:5432']
     volumes: [pgdata:/var/lib/postgresql/data]
 
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    ports: ['6379:6379']
 
   api:
     build: ./apps/api
@@ -441,7 +446,7 @@ services:
       STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET}
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
-    ports: ["3001:3001"]
+    ports: ['3001:3001']
 
   web:
     build: ./apps/web
@@ -450,13 +455,13 @@ services:
       NEXT_PUBLIC_API_URL: http://api:3001
       NEXTAUTH_URL: http://localhost:3000
       SENTRY_DSN: ${SENTRY_DSN}
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
 
   bull-board:
     build: ./apps/api
-    command: ["node", "dist/bull-board.js"]
+    command: ['node', 'dist/bull-board.js']
     depends_on: [redis]
-    ports: ["3002:3002"]
+    ports: ['3002:3002']
 ```
 
 ---
@@ -466,15 +471,18 @@ services:
 Two approaches, both used together:
 
 ### On-the-fly (for interactive filters)
+
 - Simple queries: `SELECT time_bucket('1 week', started_at), SUM(distance_meters) FROM activities WHERE user_id = ? GROUP BY 1`
 - Cache in Redis with 5-minute TTL, keyed by `analytics:{userId}:{queryHash}`
 
 ### Pre-aggregated (for dashboard cold load)
+
 - `DailyMetrics` table is updated whenever a new activity is synced, updated, or deleted
 - CTL/ATL/TSB are recalculated as a background job after each sync (exponential moving average)
 - TimescaleDB Continuous Aggregates for weekly/monthly rollups
 
 ### DailyMetrics Recalculation
+
 - On `activity.create`: increment metrics for the activity's date
 - On `activity.update`: diff the old and new values, adjust the affected date's metrics
 - On `activity.delete`: decrement metrics for the activity's date
@@ -484,16 +492,16 @@ Two approaches, both used together:
 
 ## 12. Security Considerations
 
-| Concern | Mitigation |
-|---------|-----------|
-| OAuth token storage | AES-256-GCM with envelope encryption; see [ADR-011](adrs/ADR-011.md) |
-| Key management | DEKs per-user, wrapped by a master KEK; rotation plan defined in ADR-011 |
-| Token in transit | HTTPS only; tokens never in URL params |
+| Concern                 | Mitigation                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| OAuth token storage     | AES-256-GCM with envelope encryption; see [ADR-011](adrs/ADR-011.md)                |
+| Key management          | DEKs per-user, wrapped by a master KEK; rotation plan defined in ADR-011            |
+| Token in transit        | HTTPS only; tokens never in URL params                                              |
 | Strava webhook spoofing | Verify `hub.verify_token` on subscription; validate owner against known connections |
-| API auth | Short-lived JWTs (15min) + refresh token rotation |
-| User data isolation | All queries scoped by `userId` from JWT claims; no user can see another's data |
-| Rate limiting | NestJS `@nestjs/throttler` on all endpoints |
-| Data deletion | Soft delete with 30-day retention, then hard delete; see [ADR-014](adrs/ADR-014.md) |
+| API auth                | Short-lived JWTs (15min) + refresh token rotation                                   |
+| User data isolation     | All queries scoped by `userId` from JWT claims; no user can see another's data      |
+| Rate limiting           | NestJS `@nestjs/throttler` on all endpoints                                         |
+| Data deletion           | Soft delete with 30-day retention, then hard delete; see [ADR-014](adrs/ADR-014.md) |
 
 ---
 
@@ -501,12 +509,12 @@ Two approaches, both used together:
 
 > Full details in [ADR-014](adrs/ADR-014.md)
 
-| Action | Behavior |
-|--------|----------|
-| **User disconnects a provider** | Revoke OAuth tokens, optionally keep or delete synced activities (user chooses) |
-| **User deletes account** | Soft delete immediately; all data hard-deleted after 30-day grace period |
-| **Data export** | User can request a full JSON export of all their data (GDPR Article 20) |
-| **Provider sends deauthorize event** | Same as disconnect: revoke tokens, notify user |
+| Action                               | Behavior                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------- |
+| **User disconnects a provider**      | Revoke OAuth tokens, optionally keep or delete synced activities (user chooses) |
+| **User deletes account**             | Soft delete immediately; all data hard-deleted after 30-day grace period        |
+| **Data export**                      | User can request a full JSON export of all their data (GDPR Article 20)         |
+| **Provider sends deauthorize event** | Same as disconnect: revoke tokens, notify user                                  |
 
 ---
 
@@ -514,19 +522,20 @@ Two approaches, both used together:
 
 > Full details in [ADR-015](adrs/ADR-015.md)
 
-| Layer | Approach | Tools |
-|-------|----------|-------|
-| **Unit** | Domain logic, analytics formulas, normalization | Jest |
-| **Integration** | API endpoints, database queries, BullMQ flows | Jest + Testcontainers (PG, Redis) |
-| **Adapter** | Strava API interactions | Recorded HTTP fixtures (nock/msw) |
-| **E2E** | Critical user flows (login, connect, view dashboard) | Playwright |
-| **Contract** | Shared types haven't drifted | TypeScript strict mode + CI checks |
+| Layer           | Approach                                             | Tools                              |
+| --------------- | ---------------------------------------------------- | ---------------------------------- |
+| **Unit**        | Domain logic, analytics formulas, normalization      | Jest                               |
+| **Integration** | API endpoints, database queries, BullMQ flows        | Jest + Testcontainers (PG, Redis)  |
+| **Adapter**     | Strava API interactions                              | Recorded HTTP fixtures (nock/msw)  |
+| **E2E**         | Critical user flows (login, connect, view dashboard) | Playwright                         |
+| **Contract**    | Shared types haven't drifted                         | TypeScript strict mode + CI checks |
 
 ---
 
 ## 15. Phased Roadmap
 
 ### Phase 1: MVP (Strava only)
+
 - [ ] Monorepo scaffold (Turborepo + pnpm)
 - [ ] Observability setup (Pino, Sentry, Bull Board)
 - [ ] Auth (login, Strava OAuth, JWT)
@@ -536,6 +545,7 @@ Two approaches, both used together:
 - [ ] Account settings: disconnect, data export, delete account
 
 ### Phase 2: Analytics Core
+
 - [ ] Training load chart (CTL/ATL/TSB)
 - [ ] Best efforts & PR progression
 - [ ] Heart rate zone analysis
@@ -543,17 +553,20 @@ Two approaches, both used together:
 - [ ] Year-over-year comparison
 
 ### Phase 3: Geo & Routes
+
 - [ ] Activity heatmap (Leaflet)
 - [ ] Route clustering & most-run routes
 - [ ] Elevation archives
 
 ### Phase 4: Multi-source
+
 - [ ] Garmin Connect adapter
 - [ ] Apple Health import (CSV/XML)
 - [ ] Polar Flow adapter
 - [ ] Deduplication logic (same activity from multiple sources)
 
 ### Phase 5: Intelligence
+
 - [ ] Race time predictor
 - [ ] Training plan builder
 - [ ] Anomaly detection (unusual spikes)
@@ -563,24 +576,24 @@ Two approaches, both used together:
 
 ## 16. Summary of Recommendations
 
-| Decision | Choice | Rationale | ADR |
-|----------|--------|-----------|-----|
-| Monorepo | Turborepo + pnpm | Fast builds, zero config, Vercel-native | [001](adrs/ADR-001.md) |
-| Database | TimescaleDB (PG extension) | SQL familiarity + native time-series performance | [002](adrs/ADR-002.md) |
-| ORM | Prisma | Type-safe, monorepo-friendly, great migrations | [003](adrs/ADR-003.md) |
-| Jobs | BullMQ + Redis | Already need Redis; robust retry + rate limiting | [004](adrs/ADR-004.md) |
-| Auth | Auth.js + NestJS JWT | Strava OAuth handled; stateless API | [005](adrs/ADR-005.md) |
-| Adapter pattern | Interface + DI | Business logic never imports from `strava` | [006](adrs/ADR-006.md) |
-| Data fetching | TanStack Query + Server Components | Best of both worlds: SSR + client interactivity | [007](adrs/ADR-007.md) |
-| Charts | Recharts + D3 | Recharts for 90% of charts, D3 for custom | [008](adrs/ADR-008.md) |
-| Observability | Pino + Sentry + Bull Board | Structured logs, error tracking, job visibility | [009](adrs/ADR-009.md) |
-| Raw data storage | Separate table | Keeps Activity table lean, raw data available for reprocessing | [010](adrs/ADR-010.md) |
-| Key management | Envelope encryption | Per-user DEKs, rotatable master KEK | [011](adrs/ADR-011.md) |
-| API versioning | URL prefix (`/api/v1/`) | Explicit, cache-friendly, easy to understand | [012](adrs/ADR-012.md) |
-| Webhook reliability | Idempotency log | At-least-once delivery with deduplication | [013](adrs/ADR-013.md) |
-| Data lifecycle | Soft delete + 30-day retention | GDPR compliant, reversible mistakes | [014](adrs/ADR-014.md) |
-| Testing | Jest + Testcontainers + Playwright | Coverage across all layers, realistic DB tests | [015](adrs/ADR-015.md) |
-| Deployment (later) | Railway / Render / fly.io | Docker Compose → PaaS with minimal changes | TBD |
+| Decision            | Choice                             | Rationale                                                      | ADR                    |
+| ------------------- | ---------------------------------- | -------------------------------------------------------------- | ---------------------- |
+| Monorepo            | Turborepo + pnpm                   | Fast builds, zero config, Vercel-native                        | [001](adrs/ADR-001.md) |
+| Database            | TimescaleDB (PG extension)         | SQL familiarity + native time-series performance               | [002](adrs/ADR-002.md) |
+| ORM                 | Prisma                             | Type-safe, monorepo-friendly, great migrations                 | [003](adrs/ADR-003.md) |
+| Jobs                | BullMQ + Redis                     | Already need Redis; robust retry + rate limiting               | [004](adrs/ADR-004.md) |
+| Auth                | Auth.js + NestJS JWT               | Strava OAuth handled; stateless API                            | [005](adrs/ADR-005.md) |
+| Adapter pattern     | Interface + DI                     | Business logic never imports from `strava`                     | [006](adrs/ADR-006.md) |
+| Data fetching       | TanStack Query + Server Components | Best of both worlds: SSR + client interactivity                | [007](adrs/ADR-007.md) |
+| Charts              | Recharts + D3                      | Recharts for 90% of charts, D3 for custom                      | [008](adrs/ADR-008.md) |
+| Observability       | Pino + Sentry + Bull Board         | Structured logs, error tracking, job visibility                | [009](adrs/ADR-009.md) |
+| Raw data storage    | Separate table                     | Keeps Activity table lean, raw data available for reprocessing | [010](adrs/ADR-010.md) |
+| Key management      | Envelope encryption                | Per-user DEKs, rotatable master KEK                            | [011](adrs/ADR-011.md) |
+| API versioning      | URL prefix (`/api/v1/`)            | Explicit, cache-friendly, easy to understand                   | [012](adrs/ADR-012.md) |
+| Webhook reliability | Idempotency log                    | At-least-once delivery with deduplication                      | [013](adrs/ADR-013.md) |
+| Data lifecycle      | Soft delete + 30-day retention     | GDPR compliant, reversible mistakes                            | [014](adrs/ADR-014.md) |
+| Testing             | Jest + Testcontainers + Playwright | Coverage across all layers, realistic DB tests                 | [015](adrs/ADR-015.md) |
+| Deployment (later)  | Railway / Render / fly.io          | Docker Compose → PaaS with minimal changes                     | TBD                    |
 
 ---
 
@@ -588,11 +601,11 @@ Two approaches, both used together:
 
 For deeper dives, see the `/docs/` directory:
 
-| Document | Scope |
-|----------|-------|
-| `AUTH_AND_TOKEN_MANAGEMENT.md` | Full OAuth flow, token encryption, refresh logic, session handling |
-| `SYNC_ENGINE.md` | BullMQ job definitions, retry policies, rate limiting, idempotency |
-| `ANALYTICS_COMPUTATION.md` | Formulas for CTL/ATL/TSB, DailyMetrics maintenance, cache invalidation |
-| `DATA_MODEL.md` | Full Prisma schema, all indexes, TimescaleDB hypertable setup |
-| `ADAPTER_DEVELOPMENT_GUIDE.md` | How to build a new adapter, interface contract, testing patterns |
-| `INFRASTRUCTURE.md` | Docker setup, CI/CD, environments, monitoring, deployment |
+| Document                       | Scope                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `AUTH_AND_TOKEN_MANAGEMENT.md` | Full OAuth flow, token encryption, refresh logic, session handling     |
+| `SYNC_ENGINE.md`               | BullMQ job definitions, retry policies, rate limiting, idempotency     |
+| `ANALYTICS_COMPUTATION.md`     | Formulas for CTL/ATL/TSB, DailyMetrics maintenance, cache invalidation |
+| `DATA_MODEL.md`                | Full Prisma schema, all indexes, TimescaleDB hypertable setup          |
+| `ADAPTER_DEVELOPMENT_GUIDE.md` | How to build a new adapter, interface contract, testing patterns       |
+| `INFRASTRUCTURE.md`            | Docker setup, CI/CD, environments, monitoring, deployment              |
