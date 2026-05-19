@@ -3,24 +3,25 @@ import { PrismaClient } from '@trainlens/database';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class DatabaseService implements OnModuleInit, OnModuleDestroy {
+  readonly client: PrismaClient;
+
   constructor(@InjectPinoLogger(DatabaseService.name) private readonly logger: PinoLogger) {
-    super({
+    this.client = new PrismaClient({
       log: [
-        { emit: 'event', level: 'query' },
-        { emit: 'event', level: 'error' },
-        { emit: 'event', level: 'warn' },
+        { emit: 'stdout', level: 'error' },
+        { emit: 'stdout', level: 'warn' },
       ],
     });
   }
 
   async onModuleInit() {
-    await this.$connect();
+    await this.client.$connect();
     this.logger.info('Database connected');
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    await this.client.$disconnect();
     this.logger.info('Database disconnected');
   }
 }
