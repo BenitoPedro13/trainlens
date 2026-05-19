@@ -2,31 +2,29 @@
  * One-command database setup for local development.
  *
  * Usage (from monorepo root):
- *   pnpm db:setup
+ *   pnpm db:setup           — start Docker, migrate, verify
+ *   pnpm db:setup:reset     — drop DB first, then setup from scratch
  *
  * What it does:
  *   1. Starts Docker Compose (postgres + redis) if not already running
  *   2. Waits for PostgreSQL to be healthy
- *   3. Applies Prisma migrations
- *   4. Creates the TimescaleDB hypertable on Activity
- *
- * Options:
- *   --reset   Drop and recreate the database before migrating
+ *   3. Applies all Prisma migrations (including TimescaleDB hypertable setup)
  */
 import { execSync, spawnSync } from 'child_process';
 import { join } from 'path';
 import { PrismaClient } from '@prisma/client';
 
 const ROOT = join(__dirname, '../../..');
-const SCHEMA = join(__dirname, '../prisma/schema.prisma');
+const DB_PKG = join(ROOT, 'packages/database');
+const SCHEMA = join(DB_PKG, 'prisma/schema.prisma');
 const DB_URL =
   process.env['DATABASE_URL'] ?? 'postgresql://postgres:postgres@localhost:5432/fitness_analytics';
 const RESET = process.argv.includes('--reset');
 
-function run(cmd: string, opts: { cwd?: string; silent?: boolean } = {}) {
+function run(cmd: string, opts: { cwd?: string } = {}) {
   execSync(cmd, {
     cwd: opts.cwd ?? ROOT,
-    stdio: opts.silent ? 'pipe' : 'inherit',
+    stdio: 'inherit',
     env: { ...process.env, DATABASE_URL: DB_URL },
   });
 }
@@ -57,6 +55,20 @@ async function waitForPostgres(maxAttempts = 30, intervalMs = 1000) {
   throw new Error('PostgreSQL did not become ready in time. Is Docker running?');
 }
 
+async function resetDatabase() {
+  log('💥 --reset: dropping and recreating database...');
+  run(
+    `docker exec trainlens-postgres psql -U postgres -c "DROP DATABASE IF EXISTS fitness_analytics;"`,
+  );
+  run(
+    `docker exec trainlens-postgres psql -U postgres -c "CREATE DATABASE fitness_analytics;"`,
+  );
+  run(
+    `docker exec trainlens-postgres psql -U postgres -d fitness_analytics -c "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"`,
+  );
+  log('✅ Database recreated');
+}
+
 async function main() {
   // ── 1. Docker Compose ──────────────────────────────────────────────────────
   log('🐳 Starting Docker Compose services...');
@@ -64,69 +76,26 @@ async function main() {
   await waitForPostgres();
 
   // ── 2. Reset (optional) ────────────────────────────────────────────────────
-  if (RESET) {
-    log('💥 --reset: dropping and recreating database...');
-    run(
-      `docker exec trainlens-postgres psql -U postgres -c "DROP DATABASE IF EXISTS fitness_analytics;"`,
-    );
-    run(
-      `docker exec trainlens-postgres psql -U postgres -c "CREATE DATABASE fitness_analytics;"`,
-    );
-    run(
-      `docker exec trainlens-postgres psql -U postgres -d fitness_analytics -c "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"`,
-    );
-    log('✅ Database recreated');
-  }
+  if (RESET) await resetDatabase();
 
-  // ── 3. Prisma migrations ───────────────────────────────────────────────────
+  // ── 3. Migrations (includes hypertable setup) ──────────────────────────────
   log('🗄️  Applying Prisma migrations...');
-  // Run via pnpm exec to use the locally installed prisma version
-  const DB_PKG = join(ROOT, 'packages/database');
   run(`pnpm exec prisma migrate deploy --schema="${SCHEMA}"`, { cwd: DB_PKG });
   log('✅ Migrations applied');
 
-  // ── 4. TimescaleDB hypertable ──────────────────────────────────────────────
-  log('⏱️  Configuring TimescaleDB hypertable...');
+  // ── 4. Verify ──────────────────────────────────────────────────────────────
   const prisma = new PrismaClient({ datasources: { db: { url: DB_URL } } });
   try {
-    await prisma.$transaction([
-      prisma.$executeRawUnsafe(
-        `ALTER TABLE "ActivityRawPayload" DROP CONSTRAINT IF EXISTS "ActivityRawPayload_activityId_fkey"`,
-      ),
-      prisma.$executeRawUnsafe(
-        `ALTER TABLE "Activity" DROP CONSTRAINT IF EXISTS "Activity_pkey"`,
-      ),
-      prisma.$executeRawUnsafe(
-        `DROP INDEX IF EXISTS "Activity_userId_provider_externalId_key"`,
-      ),
-    ]);
-
-    // create_hypertable cannot run inside a transaction
-    await prisma.$executeRawUnsafe(
-      `SELECT create_hypertable('"Activity"', by_range('startedAt'), if_not_exists => TRUE)`,
-    );
-
-    await prisma.$transaction([
-      prisma.$executeRawUnsafe(
-        `ALTER TABLE "Activity" ADD CONSTRAINT "Activity_pkey" PRIMARY KEY (id, "startedAt")`,
-      ),
-      prisma.$executeRawUnsafe(
-        `CREATE UNIQUE INDEX IF NOT EXISTS "Activity_userId_provider_externalId_startedAt_key" ON "Activity"("userId", provider, "externalId", "startedAt")`,
-      ),
-    ]);
-
-    log('✅ TimescaleDB hypertable configured');
-
-    // Verify
     const rows = await prisma.$queryRaw<Array<{ hypertable_name: string }>>`
-      SELECT hypertable_name FROM timescaledb_information.hypertables WHERE hypertable_name = 'Activity'
+      SELECT hypertable_name FROM timescaledb_information.hypertables
+      WHERE hypertable_name = 'Activity'
     `;
-    if (!rows[0]) throw new Error('Hypertable not found after creation');
+    if (!rows[0]) throw new Error('Activity hypertable not found after migration');
+    log('⏱️  TimescaleDB hypertable verified');
   } finally {
     await prisma.$disconnect();
   }
 
-  // ── Done ───────────────────────────────────────────────────────────────────
   log('🚀 Database ready. Run `pnpm dev` to start the stack.\n');
 }
 
