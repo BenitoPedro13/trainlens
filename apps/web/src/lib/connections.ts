@@ -1,11 +1,11 @@
 /**
  * Persistence helpers for OAuth provider connections.
  *
- * Token encryption (task 1.3 / 1.4) is applied here before writing to the DB.
- * Until task 1.4, tokens are stored as-is — replaced atomically when encryption
- * is wired in.
+ * All tokens are encrypted with AES-256-GCM envelope encryption (ADR-011)
+ * using encryptToken / decryptToken from @trainlens/shared before storage.
  */
 import type { ProviderType } from '@trainlens/shared';
+import { encryptToken, decryptToken } from '@trainlens/shared';
 import { prisma } from '@/lib/db';
 
 export interface UpsertConnectionParams {
@@ -18,19 +18,44 @@ export interface UpsertConnectionParams {
   scope?: string;
 }
 
+export interface DecryptedTokens {
+  accessToken: string;
+  refreshToken: string;
+  tokenExpiresAt: Date | null;
+}
+
+export async function getStravaTokens(userId: string): Promise<DecryptedTokens | null> {
+  const conn = await prisma.connection.findUnique({
+    where: { userId_provider: { userId, provider: 'strava' } },
+    select: {
+      encryptedAccessToken: true,
+      encryptedRefreshToken: true,
+      tokenExpiresAt: true,
+    },
+  });
+  if (!conn) return null;
+
+  return {
+    accessToken: decryptToken(conn.encryptedAccessToken),
+    refreshToken: conn.encryptedRefreshToken ? decryptToken(conn.encryptedRefreshToken) : '',
+    tokenExpiresAt: conn.tokenExpiresAt,
+  };
+}
+
 export async function upsertStravaConnection(params: UpsertConnectionParams): Promise<void> {
   const { userId, accessToken, refreshToken, expiresAt, stravaAthleteId, scope } = params;
 
   const athleteId = stravaAthleteId ?? 'unknown';
+  const encAccessToken = encryptToken(accessToken);
+  const encRefreshToken = encryptToken(refreshToken);
 
   await prisma.connection.upsert({
     where: {
       userId_provider: { userId, provider: 'strava' },
     },
     update: {
-      // TODO (task 1.4): wrap with encryptToken() from packages/crypto
-      encryptedAccessToken: accessToken,
-      encryptedRefreshToken: refreshToken,
+      encryptedAccessToken: encAccessToken,
+      encryptedRefreshToken: encRefreshToken,
       tokenExpiresAt: new Date(expiresAt * 1000),
       externalAthleteId: athleteId,
       scope: scope ?? 'activity:read_all',
@@ -40,9 +65,8 @@ export async function upsertStravaConnection(params: UpsertConnectionParams): Pr
     create: {
       userId,
       provider: 'strava',
-      // TODO (task 1.4): wrap with encryptToken() from packages/crypto
-      encryptedAccessToken: accessToken,
-      encryptedRefreshToken: refreshToken,
+      encryptedAccessToken: encAccessToken,
+      encryptedRefreshToken: encRefreshToken,
       tokenExpiresAt: new Date(expiresAt * 1000),
       externalAthleteId: athleteId,
       scope: scope ?? 'activity:read_all',
