@@ -1,3 +1,9 @@
+// Load root .env before any module initialises (env vars must exist before
+// NestJS DI wires providers like JwtStrategy that read them at construction).
+import { config } from 'dotenv';
+import { resolve } from 'path';
+config({ path: resolve(process.cwd(), '../../.env'), override: false });
+
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Logger } from 'nestjs-pino';
