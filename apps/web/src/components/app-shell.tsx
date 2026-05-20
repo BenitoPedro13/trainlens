@@ -4,6 +4,7 @@ import { signOut } from '@/auth';
 const nav = [
   { href: '/dashboard' as const, label: 'Dashboard' },
   { href: '/activities' as const, label: 'Activities' },
+  { href: '/settings' as const, label: 'Settings' },
 ];
 
 export function AppShell({
