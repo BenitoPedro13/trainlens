@@ -16,6 +16,7 @@ import { DatabaseService } from '../database/database.service.js';
 import { AnalyticsController } from './analytics.controller.js';
 import { AnalyticsService } from './analytics.service.js';
 import { DailyMetricsService } from './daily-metrics.service.js';
+import { TssService } from './tss.service.js';
 import { CacheService } from '../cache/cache.service.js';
 
 const TEST_SECRET = 'integration-test-secret-32-bytes!!';
@@ -92,6 +93,7 @@ describe('Analytics summary (integration)', () => {
         },
         AnalyticsService,
         DailyMetricsService,
+        TssService,
         { provide: CacheService, useClass: InMemoryCacheService },
       ],
     }).compile();

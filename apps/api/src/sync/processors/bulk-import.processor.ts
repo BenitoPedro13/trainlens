@@ -8,7 +8,7 @@ import { ConnectionTokensService } from '../connection-tokens.service';
 import { ActivityPersistenceService } from '../activity-persistence.service';
 import { DatabaseService } from '../../database/database.service';
 import { captureWorkerError } from '../../common/sentry.util';
-import { DailyMetricsService } from '../../analytics/daily-metrics.service';
+import { AnalyticsRecalcService } from '../../analytics/analytics-recalc.service';
 
 @Processor(QUEUE_NAMES.BULK_IMPORT, { concurrency: 1 })
 export class BulkImportProcessor extends WorkerHost {
@@ -19,7 +19,7 @@ export class BulkImportProcessor extends WorkerHost {
     private readonly tokens: ConnectionTokensService,
     private readonly activities: ActivityPersistenceService,
     private readonly db: DatabaseService,
-    private readonly dailyMetrics: DailyMetricsService,
+    private readonly analyticsRecalc: AnalyticsRecalcService,
   ) {
     super();
   }
@@ -69,7 +69,7 @@ export class BulkImportProcessor extends WorkerHost {
       },
     });
 
-    await this.dailyMetrics.recalculateForUser(userId);
+    await this.analyticsRecalc.enqueue(userId);
 
     this.logger.log(`Bulk import complete for user ${userId}: ${imported} activities`);
     return { imported };

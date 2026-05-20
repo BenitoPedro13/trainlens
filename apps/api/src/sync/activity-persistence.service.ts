@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Activity } from '@trainlens/shared';
+import { calculateActivityTss, type Activity } from '@trainlens/shared';
 import type { ActivityType, Prisma } from '@trainlens/database';
 import { DatabaseService } from '../database/database.service';
 
@@ -85,6 +85,7 @@ export class ActivityPersistenceService {
         summaryPolyline: data.summaryPolyline ?? null,
         deviceName: data.deviceName ?? null,
         manual: data.manual ?? false,
+        tss: data.tss ?? null,
         updatedAt: new Date(),
       },
     });
@@ -124,6 +125,15 @@ export class ActivityPersistenceService {
       summaryPolyline: activity.summaryPolyline ?? null,
       deviceName: activity.deviceName ?? null,
       manual: activity.manual,
+      tss: calculateActivityTss({
+        durationSeconds: activity.durationSeconds,
+        activityType: activity.activityType,
+        averageHeartRate: activity.averageHeartRate ?? null,
+        maxHeartRate: activity.maxHeartRate ?? null,
+        averagePowerWatts: activity.averagePowerWatts ?? null,
+        normalizedPowerWatts: activity.normalizedPowerWatts ?? null,
+        averagePaceSecondsPerKm: activity.averagePaceSecondsPerKm ?? null,
+      }),
     };
   }
 }

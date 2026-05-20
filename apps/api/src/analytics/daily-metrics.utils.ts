@@ -4,6 +4,7 @@ export interface DayAggregate {
   totalDurationSeconds: number;
   totalElevationGainMeters: number;
   totalCalories: number;
+  tss: number;
 }
 
 export interface ActivityMetricsInput {
@@ -12,6 +13,7 @@ export interface ActivityMetricsInput {
   durationSeconds: number;
   elevationGainMeters: number | null;
   calories: number | null;
+  tss: number | null;
 }
 
 export function aggregateActivitiesByDay(
@@ -27,12 +29,14 @@ export function aggregateActivitiesByDay(
       totalDurationSeconds: 0,
       totalElevationGainMeters: 0,
       totalCalories: 0,
+      tss: 0,
     };
     agg.totalActivities += 1;
     agg.totalDistanceMeters += a.distanceMeters ?? 0;
     agg.totalDurationSeconds += a.durationSeconds;
     agg.totalElevationGainMeters += a.elevationGainMeters ?? 0;
     agg.totalCalories += a.calories ?? 0;
+    agg.tss += a.tss ?? 0;
     byDate.set(dateKey, agg);
   }
 

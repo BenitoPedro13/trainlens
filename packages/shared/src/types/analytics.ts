@@ -1,16 +1,52 @@
 export interface TrainingLoad {
-  date: Date;
+  date: string;
   ctl: number;
   atl: number;
   tsb: number;
   tss: number;
 }
 
+export interface TrainingLoadResponse {
+  points: TrainingLoad[];
+}
+
+export interface BestEffortsResponse {
+  efforts: BestEffort[];
+}
+
+export interface PaceZone {
+  zone: 1 | 2 | 3 | 4 | 5;
+  label: string;
+  minSecondsPerKm: number;
+  maxSecondsPerKm: number;
+  durationSeconds: number;
+  percentOfTotal: number;
+}
+
+export interface ZonesResponse {
+  heartRate: HeartRateZone[];
+  pace: PaceZone[];
+}
+
+export interface YearOverYearPoint {
+  period: string;
+  year: number;
+  weekOrMonth: number;
+  distanceMeters: number;
+  activityCount: number;
+  tss: number;
+}
+
+export interface YearOverYearResponse {
+  mode: 'week' | 'month';
+  points: YearOverYearPoint[];
+}
+
 export interface BestEffort {
   distanceMeters: number;
   label: string;
   durationSeconds: number;
-  achievedAt: Date;
+  achievedAt: string;
   activityId: string;
 }
 

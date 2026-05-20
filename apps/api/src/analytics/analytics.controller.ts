@@ -1,5 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import type { AnalyticsSummaryResponse } from '@trainlens/shared';
+import type {
+  AnalyticsSummaryResponse,
+  BestEffortsResponse,
+  TrainingLoadResponse,
+  YearOverYearResponse,
+  ZonesResponse,
+} from '@trainlens/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { RequestUser } from '../auth/jwt.strategy';
@@ -30,5 +36,42 @@ export class AnalyticsController {
   ): Promise<Array<{ date: string; count: number; distanceMeters: number }>> {
     const y = year ? parseInt(year, 10) : new Date().getUTCFullYear();
     return this.dailyMetrics.getHeatmapData(user.userId, y);
+  }
+
+  @Get('training-load')
+  getTrainingLoad(
+    @CurrentUser() user: RequestUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<TrainingLoadResponse> {
+    return this.analytics.getTrainingLoad(user.userId, from, to);
+  }
+
+  @Get('best-efforts')
+  getBestEfforts(
+    @CurrentUser() user: RequestUser,
+    @Query('activityType') activityType?: string,
+  ): Promise<BestEffortsResponse> {
+    return this.analytics.getBestEfforts(user.userId, activityType);
+  }
+
+  @Get('zones')
+  getZones(
+    @CurrentUser() user: RequestUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<ZonesResponse> {
+    return this.analytics.getZones(user.userId, from, to);
+  }
+
+  @Get('year-over-year')
+  getYearOverYear(
+    @CurrentUser() user: RequestUser,
+    @Query('mode') mode?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<YearOverYearResponse> {
+    const m = mode === 'month' ? 'month' : 'week';
+    return this.analytics.getYearOverYear(user.userId, m, from, to);
   }
 }

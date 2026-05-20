@@ -24,11 +24,45 @@ export type {
   ActivityDetailResponse,
   PaginatedActivitiesResponse,
   BestEffort,
+  BestEffortsResponse,
   HeartRateZone,
+  PaceZone,
   SportDistributionItem,
   TrainingLoad,
+  TrainingLoadResponse,
   WeeklyVolumePoint,
+  YearOverYearPoint,
+  YearOverYearResponse,
+  ZonesResponse,
 } from './types/analytics.js';
+
+export {
+  calculateActivityTss,
+  DEFAULT_FTP_WATTS,
+  DEFAULT_THRESHOLD_HR,
+  DEFAULT_THRESHOLD_PACE_SEC_PER_KM,
+} from './analytics/tss.js';
+export type { TssActivityInput } from './analytics/tss.js';
+
+export {
+  computeTrainingLoadSeries,
+  fillDailyTssTimeline,
+  CTL_TIME_CONSTANT,
+  ATL_TIME_CONSTANT,
+} from './analytics/training-load.js';
+export type { DailyTssPoint, TrainingLoadPoint } from './analytics/training-load.js';
+
+export {
+  extractBestEfforts,
+  STANDARD_BEST_EFFORT_DISTANCES,
+} from './analytics/best-efforts.js';
+export type { BestEffortCandidate, BestEffortResult } from './analytics/best-efforts.js';
+
+export { computeHeartRateZones, computePaceZones } from './analytics/zones.js';
+export type { ZoneActivityInput, HeartRateZoneResult, PaceZoneResult } from './analytics/zones.js';
+
+export { computeYearOverYear } from './analytics/year-over-year.js';
+export type { YearOverYearInputRow, YearOverYearBucket } from './analytics/year-over-year.js';
 
 export {
   encrypt,

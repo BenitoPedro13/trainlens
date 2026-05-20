@@ -9,6 +9,7 @@ describe('aggregateActivitiesByDay', () => {
         durationSeconds: 1800,
         elevationGainMeters: 50,
         calories: 400,
+        tss: 50,
       },
       {
         startedAt: new Date('2024-06-01T18:00:00.000Z'),
@@ -16,6 +17,7 @@ describe('aggregateActivitiesByDay', () => {
         durationSeconds: 1200,
         elevationGainMeters: 20,
         calories: 250,
+        tss: 30,
       },
     ]);
 
@@ -27,6 +29,7 @@ describe('aggregateActivitiesByDay', () => {
       totalDurationSeconds: 3000,
       totalElevationGainMeters: 70,
       totalCalories: 650,
+      tss: 80,
     });
   });
 
@@ -38,6 +41,7 @@ describe('aggregateActivitiesByDay', () => {
         durationSeconds: 600,
         elevationGainMeters: null,
         calories: null,
+        tss: null,
       },
     ]);
 
@@ -47,6 +51,7 @@ describe('aggregateActivitiesByDay', () => {
       totalDurationSeconds: 600,
       totalElevationGainMeters: 0,
       totalCalories: 0,
+      tss: 0,
     });
   });
 });

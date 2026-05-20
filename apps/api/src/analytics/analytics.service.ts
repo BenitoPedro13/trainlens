@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import type { AnalyticsSummaryResponse } from '@trainlens/shared';
+import type {
+  AnalyticsSummaryResponse,
+  BestEffortsResponse,
+  TrainingLoadResponse,
+  YearOverYearResponse,
+  ZonesResponse,
+} from '@trainlens/shared';
+import {
+  computeHeartRateZones,
+  computePaceZones,
+  computeYearOverYear,
+  extractBestEfforts,
+} from '@trainlens/shared';
 import { DatabaseService } from '../database/database.service';
 import { CacheService } from '../cache/cache.service';
 import { DailyMetricsService } from './daily-metrics.service';
@@ -29,13 +41,7 @@ export class AnalyticsService {
     const cached = await this.cache.get<AnalyticsSummaryResponse>(cacheKey);
     if (cached) return cached;
 
-    const activityCount = await this.db.client.activity.count({
-      where: { userId, deletedAt: null },
-    });
-    const metricsCount = await this.db.client.dailyMetrics.count({ where: { userId } });
-    if (activityCount > 0 && metricsCount === 0) {
-      await this.dailyMetrics.recalculateForUser(userId);
-    }
+    await this.ensureMetrics(userId);
 
     const activities = await this.db.client.activity.findMany({
       where: {
@@ -103,6 +109,126 @@ export class AnalyticsService {
 
     await this.cache.set(cacheKey, response, CACHE_TTL_SECONDS);
     return response;
+  }
+
+  async getTrainingLoad(
+    userId: string,
+    from?: string,
+    to?: string,
+  ): Promise<TrainingLoadResponse> {
+    const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
+    const fromDate = from
+      ? new Date(`${from}T00:00:00.000Z`)
+      : new Date(toDate.getTime() - 90 * 86_400_000);
+
+    await this.ensureMetrics(userId);
+
+    const rows = await this.db.client.dailyMetrics.findMany({
+      where: { userId, date: { gte: fromDate, lte: toDate } },
+      orderBy: { date: 'asc' },
+      select: { date: true, tss: true, ctl: true, atl: true, tsb: true },
+    });
+
+    return {
+      points: rows.map((r) => ({
+        date: r.date.toISOString().slice(0, 10),
+        tss: r.tss,
+        ctl: r.ctl ?? 0,
+        atl: r.atl ?? 0,
+        tsb: r.tsb ?? 0,
+      })),
+    };
+  }
+
+  async getBestEfforts(userId: string, activityType?: string): Promise<BestEffortsResponse> {
+    const activities = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        ...(activityType && { activityType: activityType as never }),
+      },
+      select: {
+        id: true,
+        activityType: true,
+        startedAt: true,
+        durationSeconds: true,
+        distanceMeters: true,
+      },
+    });
+
+    const efforts = extractBestEfforts(activities).map((e) => ({
+      ...e,
+      achievedAt: e.achievedAt.toISOString(),
+    }));
+
+    return { efforts };
+  }
+
+  async getZones(userId: string, from?: string, to?: string): Promise<ZonesResponse> {
+    const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
+    const fromDate = from
+      ? new Date(`${from}T00:00:00.000Z`)
+      : new Date(toDate.getTime() - 84 * 86_400_000);
+
+    const activities = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        startedAt: { gte: fromDate, lte: toDate },
+      },
+      select: {
+        durationSeconds: true,
+        averageHeartRate: true,
+        maxHeartRate: true,
+        averagePaceSecondsPerKm: true,
+        activityType: true,
+      },
+    });
+
+    return {
+      heartRate: computeHeartRateZones(activities),
+      pace: computePaceZones(activities),
+    };
+  }
+
+  async getYearOverYear(
+    userId: string,
+    mode: 'week' | 'month' = 'week',
+    from?: string,
+    to?: string,
+  ): Promise<YearOverYearResponse> {
+    const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
+    const fromDate = from
+      ? new Date(`${from}T00:00:00.000Z`)
+      : new Date(toDate.getTime() - 730 * 86_400_000);
+
+    const activities = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        startedAt: { gte: fromDate, lte: toDate },
+      },
+      select: {
+        startedAt: true,
+        distanceMeters: true,
+        tss: true,
+      },
+    });
+
+    return {
+      mode,
+      points: computeYearOverYear(activities, mode),
+    };
+  }
+
+  private async ensureMetrics(userId: string): Promise<void> {
+    const activityCount = await this.db.client.activity.count({
+      where: { userId, deletedAt: null },
+    });
+    const metricsCount = await this.db.client.dailyMetrics.count({ where: { userId } });
+    if (activityCount > 0 && metricsCount === 0) {
+      await this.dailyMetrics.recalculateForUser(userId);
+    }
   }
 
   private cacheKey(userId: string, from: Date, to: Date): string {

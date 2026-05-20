@@ -8,7 +8,7 @@ import { ConnectionTokensService } from '../connection-tokens.service';
 import { ActivityPersistenceService } from '../activity-persistence.service';
 import { DatabaseService } from '../../database/database.service';
 import { captureWorkerError } from '../../common/sentry.util';
-import { DailyMetricsService } from '../../analytics/daily-metrics.service';
+import { AnalyticsRecalcService } from '../../analytics/analytics-recalc.service';
 
 @Processor(QUEUE_NAMES.ACTIVITY_SYNC, { concurrency: 3 })
 export class ActivitySyncProcessor extends WorkerHost {
@@ -19,7 +19,7 @@ export class ActivitySyncProcessor extends WorkerHost {
     private readonly tokens: ConnectionTokensService,
     private readonly activities: ActivityPersistenceService,
     private readonly db: DatabaseService,
-    private readonly dailyMetrics: DailyMetricsService,
+    private readonly analyticsRecalc: AnalyticsRecalcService,
   ) {
     super();
   }
@@ -31,6 +31,7 @@ export class ActivitySyncProcessor extends WorkerHost {
     if (action === 'delete') {
       await this.activities.softDeleteByExternalId(userId, String(stravaActivityId));
       await this.finishWebhook(webhookEventId, userId);
+      await this.analyticsRecalc.enqueue(userId);
       return;
     }
 
@@ -79,7 +80,7 @@ export class ActivitySyncProcessor extends WorkerHost {
       data: { lastSyncedAt: new Date(), status: 'active', syncErrorMessage: null },
     });
 
-    await this.dailyMetrics.recalculateForUser(userId);
+    await this.analyticsRecalc.enqueue(userId);
   }
 
   @OnWorkerEvent('failed')

@@ -79,3 +79,61 @@ export function getActivity(userId: string, id: string, email?: string | null) {
     email,
   );
 }
+
+export function getTrainingLoad(
+  userId: string,
+  params: { from?: string; to?: string },
+  email?: string | null,
+) {
+  const q = new URLSearchParams();
+  if (params.from) q.set('from', params.from);
+  if (params.to) q.set('to', params.to);
+  const qs = q.toString();
+  return apiFetch<import('@trainlens/shared').TrainingLoadResponse>(
+    `/analytics/training-load${qs ? `?${qs}` : ''}`,
+    userId,
+    email,
+  );
+}
+
+export function getBestEfforts(userId: string, activityType?: string, email?: string | null) {
+  const qs = activityType ? `?activityType=${activityType}` : '';
+  return apiFetch<import('@trainlens/shared').BestEffortsResponse>(
+    `/analytics/best-efforts${qs}`,
+    userId,
+    email,
+  );
+}
+
+export function getZones(
+  userId: string,
+  params: { from?: string; to?: string },
+  email?: string | null,
+) {
+  const q = new URLSearchParams();
+  if (params.from) q.set('from', params.from);
+  if (params.to) q.set('to', params.to);
+  const qs = q.toString();
+  return apiFetch<import('@trainlens/shared').ZonesResponse>(
+    `/analytics/zones${qs ? `?${qs}` : ''}`,
+    userId,
+    email,
+  );
+}
+
+export function getYearOverYear(
+  userId: string,
+  params: { mode?: 'week' | 'month'; from?: string; to?: string },
+  email?: string | null,
+) {
+  const q = new URLSearchParams();
+  if (params.mode) q.set('mode', params.mode);
+  if (params.from) q.set('from', params.from);
+  if (params.to) q.set('to', params.to);
+  const qs = q.toString();
+  return apiFetch<import('@trainlens/shared').YearOverYearResponse>(
+    `/analytics/year-over-year${qs ? `?${qs}` : ''}`,
+    userId,
+    email,
+  );
+}
