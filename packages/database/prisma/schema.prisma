@@ -66,6 +66,12 @@ model User {
 
   passwordHash String?
 
+  /** Athlete thresholds for TSS / zones (Sprint 4). */
+  ftpWatts                 Int?
+  maxHeartRate             Int?
+  weightKg                 Float?
+  thresholdPaceSecondsPerKm Float?
+
   connections  Connection[]
   activities   Activity[]
   dailyMetrics DailyMetrics[]
@@ -126,6 +132,7 @@ model Activity {
   averagePaceSecondsPerKm Float?
   averagePowerWatts       Float?
   normalizedPowerWatts    Float?
+  estimatedPowerWatts     Float?
   maxPowerWatts           Float?
   averageCadence          Float?
   calories                Int?

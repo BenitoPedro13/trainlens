@@ -8,6 +8,8 @@ import { StravaAdapter } from '../strava/strava.adapter';
 import { ConnectionTokensService } from '../sync/connection-tokens.service';
 import { DatabaseService } from '../database/database.service';
 import { CacheService } from '../cache/cache.service';
+import type { AthleteThresholds, TrainingSettings } from '@trainlens/shared';
+import { resolveAthleteThresholds } from '@trainlens/shared';
 
 export interface SyncStatusResponse {
   provider: 'strava';
@@ -27,6 +29,60 @@ export class UsersService {
     private readonly strava: StravaAdapter,
     private readonly cache: CacheService,
   ) {}
+
+  async getTrainingSettings(userId: string): Promise<TrainingSettings> {
+    const user = await this.db.client.user.findUnique({
+      where: { id: userId },
+      select: {
+        ftpWatts: true,
+        maxHeartRate: true,
+        weightKg: true,
+        thresholdPaceSecondsPerKm: true,
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return {
+      ftpWatts: user.ftpWatts,
+      maxHeartRate: user.maxHeartRate,
+      weightKg: user.weightKg,
+      thresholdPaceSecondsPerKm: user.thresholdPaceSecondsPerKm,
+    };
+  }
+
+  async updateTrainingSettings(
+    userId: string,
+    body: Partial<TrainingSettings>,
+  ): Promise<TrainingSettings> {
+    const user = await this.db.client.user.update({
+      where: { id: userId },
+      data: {
+        ...(body.ftpWatts !== undefined && { ftpWatts: body.ftpWatts }),
+        ...(body.maxHeartRate !== undefined && { maxHeartRate: body.maxHeartRate }),
+        ...(body.weightKg !== undefined && { weightKg: body.weightKg }),
+        ...(body.thresholdPaceSecondsPerKm !== undefined && {
+          thresholdPaceSecondsPerKm: body.thresholdPaceSecondsPerKm,
+        }),
+      },
+      select: {
+        ftpWatts: true,
+        maxHeartRate: true,
+        weightKg: true,
+        thresholdPaceSecondsPerKm: true,
+      },
+    });
+    await this.cache.deleteByPrefix(`analytics:${userId}:`);
+    return {
+      ftpWatts: user.ftpWatts,
+      maxHeartRate: user.maxHeartRate,
+      weightKg: user.weightKg,
+      thresholdPaceSecondsPerKm: user.thresholdPaceSecondsPerKm,
+    };
+  }
+
+  async getAthleteThresholds(userId: string): Promise<AthleteThresholds> {
+    const settings = await this.getTrainingSettings(userId);
+    return resolveAthleteThresholds(settings);
+  }
 
   async getSyncStatus(userId: string): Promise<SyncStatusResponse> {
     const conn = await this.db.client.connection.findUnique({

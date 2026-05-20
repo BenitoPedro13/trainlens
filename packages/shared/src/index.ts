@@ -25,6 +25,10 @@ export type {
   PaginatedActivitiesResponse,
   BestEffort,
   BestEffortsResponse,
+  BestEffortProgressionResponse,
+  BestEffortProgressionSeries,
+  BestEffortProgressionPoint,
+  TrainingSettings,
   HeartRateZone,
   PaceZone,
   SportDistributionItem,
@@ -44,6 +48,20 @@ export {
 } from './analytics/tss.js';
 export type { TssActivityInput } from './analytics/tss.js';
 
+export { resolveAthleteThresholds } from './analytics/athlete-thresholds.js';
+export type { AthleteThresholds, AthleteThresholdsInput } from './analytics/athlete-thresholds.js';
+
+export { estimateActivityPower } from './analytics/estimated-power.js';
+export type { EstimatedPowerInput } from './analytics/estimated-power.js';
+
+export { extractBestEffortProgression } from './analytics/best-effort-progression.js';
+export type {
+  BestEffortProgressionPoint as BestEffortProgressionPointCalc,
+  BestEffortProgressionSeries as BestEffortProgressionSeriesCalc,
+} from './analytics/best-effort-progression.js';
+
+export { computeHeartRateZonesFromStream } from './analytics/zones-streams.js';
+
 export {
   computeTrainingLoadSeries,
   fillDailyTssTimeline,
@@ -54,6 +72,7 @@ export type { DailyTssPoint, TrainingLoadPoint } from './analytics/training-load
 
 export {
   extractBestEfforts,
+  estimateBestEffortSeconds,
   STANDARD_BEST_EFFORT_DISTANCES,
 } from './analytics/best-efforts.js';
 export type { BestEffortCandidate, BestEffortResult } from './analytics/best-efforts.js';

@@ -14,6 +14,33 @@ export interface BestEffortsResponse {
   efforts: BestEffort[];
 }
 
+export interface BestEffortProgressionPoint {
+  label: string;
+  distanceMeters: number;
+  achievedAt: string;
+  achievedOnLocal: string;
+  durationSeconds: number;
+  activityId: string;
+  isEstimated: boolean;
+}
+
+export interface BestEffortProgressionSeries {
+  label: string;
+  distanceMeters: number;
+  points: BestEffortProgressionPoint[];
+}
+
+export interface BestEffortProgressionResponse {
+  series: BestEffortProgressionSeries[];
+}
+
+export interface TrainingSettings {
+  ftpWatts: number | null;
+  maxHeartRate: number | null;
+  weightKg: number | null;
+  thresholdPaceSecondsPerKm: number | null;
+}
+
 export interface PaceZone {
   zone: 1 | 2 | 3 | 4 | 5;
   label: string;
@@ -47,7 +74,11 @@ export interface BestEffort {
   label: string;
   durationSeconds: number;
   achievedAt: string;
+  /** Athlete-local calendar date (YYYY-MM-DD) */
+  achievedOnLocal: string;
   activityId: string;
+  activityName?: string;
+  isEstimated: boolean;
 }
 
 export interface HeartRateZone {
@@ -113,6 +144,7 @@ export interface PaginatedActivitiesResponse {
 import type { ActivityLap } from './activity.js';
 
 export interface ActivityDetailResponse extends ActivityListItem {
+  estimatedPowerWatts?: number | null;
   description: string | null;
   averageHeartRate: number | null;
   maxHeartRate: number | null;

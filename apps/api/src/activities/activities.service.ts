@@ -88,6 +88,7 @@ export class ActivitiesService {
       maxHeartRate: activity.maxHeartRate,
       averagePaceSecondsPerKm: activity.averagePaceSecondsPerKm,
       averagePowerWatts: activity.averagePowerWatts,
+      estimatedPowerWatts: activity.estimatedPowerWatts,
       calories: activity.calories,
       summaryPolyline: activity.summaryPolyline,
       deviceName: activity.deviceName,

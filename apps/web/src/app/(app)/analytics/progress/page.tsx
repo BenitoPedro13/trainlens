@@ -1,19 +1,22 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { getYearOverYear } from '@/lib/api-client';
+import { resolveDateRange } from '@/lib/analytics-dates';
+import { AnalyticsDateFilter } from '@/components/analytics-date-filter';
 import { YearOverYearChart } from '@/components/charts/yoy-chart';
 
 export default async function ProgressPage({
   searchParams,
 }: {
-  searchParams: { mode?: string };
+  searchParams: { mode?: string; from?: string; to?: string };
 }) {
   const session = await auth();
   const userId = session!.user!.id!;
   const email = session!.user!.email;
   const mode = searchParams.mode === 'month' ? 'month' : 'week';
+  const { from, to } = resolveDateRange(searchParams);
 
-  const { points } = await getYearOverYear(userId, { mode }, email);
+  const { points } = await getYearOverYear(userId, { mode, from, to }, email);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -37,6 +40,8 @@ export default async function ProgressPage({
           </Link>
         </div>
       </div>
+
+      <AnalyticsDateFilter basePath="/analytics/progress" from={from} to={to} />
 
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-gray-900">Distância (km) — por ano</h2>

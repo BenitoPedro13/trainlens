@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
+import type { TrainingSettings } from '@trainlens/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { RequestUser } from '../auth/jwt.strategy';
@@ -16,6 +17,19 @@ export class UsersController {
   @Get('sync-status')
   getSyncStatus(@CurrentUser() user: RequestUser) {
     return this.users.getSyncStatus(user.userId);
+  }
+
+  @Get('training-settings')
+  getTrainingSettings(@CurrentUser() user: RequestUser) {
+    return this.users.getTrainingSettings(user.userId);
+  }
+
+  @Patch('training-settings')
+  updateTrainingSettings(
+    @CurrentUser() user: RequestUser,
+    @Body() body: Partial<TrainingSettings>,
+  ) {
+    return this.users.updateTrainingSettings(user.userId, body);
   }
 
   @Post('connections/strava/disconnect')

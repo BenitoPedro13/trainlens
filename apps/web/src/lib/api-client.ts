@@ -115,14 +115,40 @@ export function getBestEfforts(userId: string, activityType?: string, email?: st
   );
 }
 
+export function getBestEffortProgression(
+  userId: string,
+  params: { activityType?: string; from?: string; to?: string },
+  email?: string | null,
+) {
+  const q = new URLSearchParams();
+  if (params.activityType) q.set('activityType', params.activityType);
+  if (params.from) q.set('from', params.from);
+  if (params.to) q.set('to', params.to);
+  const qs = q.toString();
+  return apiFetch<import('@trainlens/shared').BestEffortProgressionResponse>(
+    `/analytics/best-efforts/progression${qs ? `?${qs}` : ''}`,
+    userId,
+    email,
+  );
+}
+
+export function getTrainingSettings(userId: string, email?: string | null) {
+  return apiFetch<import('@trainlens/shared').TrainingSettings>(
+    '/users/me/training-settings',
+    userId,
+    email,
+  );
+}
+
 export function getZones(
   userId: string,
-  params: { from?: string; to?: string },
+  params: { from?: string; to?: string; activityType?: string },
   email?: string | null,
 ) {
   const q = new URLSearchParams();
   if (params.from) q.set('from', params.from);
   if (params.to) q.set('to', params.to);
+  if (params.activityType) q.set('activityType', params.activityType);
   const qs = q.toString();
   return apiFetch<import('@trainlens/shared').ZonesResponse>(
     `/analytics/zones${qs ? `?${qs}` : ''}`,

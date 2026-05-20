@@ -60,6 +60,13 @@ export default async function ActivityDetailPage({ params }: { params: { id: str
         {activity.averagePowerWatts != null && (
           <DetailStat label="Potência média" value={`${Math.round(activity.averagePowerWatts)} W`} />
         )}
+        {activity.averagePowerWatts == null && activity.estimatedPowerWatts != null && (
+          <DetailStat
+            label="Potência estimada"
+            value={`${Math.round(activity.estimatedPowerWatts)} W`}
+            sub="Modelo pace/grade"
+          />
+        )}
         {activity.calories != null && (
           <DetailStat label="Calorias" value={String(Math.round(activity.calories))} />
         )}
@@ -78,11 +85,20 @@ export default async function ActivityDetailPage({ params }: { params: { id: str
   );
 }
 
-function DetailStat({ label, value }: { label: string; value: string }) {
+function DetailStat({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
       <p className="mt-1 text-lg font-semibold text-gray-900">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-gray-400">{sub}</p>}
     </div>
   );
 }

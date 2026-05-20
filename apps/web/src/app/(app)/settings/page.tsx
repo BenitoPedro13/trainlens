@@ -3,12 +3,15 @@ import { redirect } from 'next/navigation';
 import { auth, signIn, signOut } from '@/auth';
 import { getUserSettings } from '@/lib/user-settings';
 import { SettingsAccountActions } from '@/components/settings-account-actions';
+import { TrainingSettingsForm } from '@/components/training-settings-form';
+import { getTrainingSettings } from '@/lib/api-client';
 
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
   const { user, connection } = await getUserSettings(session.user.id);
+  const trainingSettings = await getTrainingSettings(session.user.id, session.user.email);
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -97,6 +100,8 @@ export default async function SettingsPage() {
           </Link>
         </div>
       </section>
+
+      <TrainingSettingsForm initial={trainingSettings} />
 
       <SettingsAccountActions hasStrava={Boolean(connection)} />
 

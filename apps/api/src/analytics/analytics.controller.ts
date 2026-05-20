@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import type {
   AnalyticsSummaryResponse,
+  BestEffortProgressionResponse,
   BestEffortsResponse,
   TrainingLoadResponse,
   YearOverYearResponse,
@@ -55,13 +56,24 @@ export class AnalyticsController {
     return this.analytics.getBestEfforts(user.userId, activityType);
   }
 
+  @Get('best-efforts/progression')
+  getBestEffortProgression(
+    @CurrentUser() user: RequestUser,
+    @Query('activityType') activityType?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<BestEffortProgressionResponse> {
+    return this.analytics.getBestEffortProgression(user.userId, activityType, from, to);
+  }
+
   @Get('zones')
   getZones(
     @CurrentUser() user: RequestUser,
     @Query('from') from?: string,
     @Query('to') to?: string,
+    @Query('activityType') activityType?: string,
   ): Promise<ZonesResponse> {
-    return this.analytics.getZones(user.userId, from, to);
+    return this.analytics.getZones(user.userId, from, to, activityType);
   }
 
   @Get('year-over-year')

@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { calculateActivityTss, type Activity } from '@trainlens/shared';
+import {
+  calculateActivityTss,
+  estimateActivityPower,
+  resolveAthleteThresholds,
+  type Activity,
+} from '@trainlens/shared';
 import type { ActivityType, Prisma } from '@trainlens/database';
 import { DatabaseService } from '../database/database.service';
 
@@ -49,7 +54,17 @@ export class ActivityPersistenceService {
   }
 
   private async upsertOne(connectionId: string, activity: Activity): Promise<string> {
-    const data = this.toPrismaFields(connectionId, activity);
+    const user = await this.db.client.user.findUnique({
+      where: { id: activity.userId },
+      select: {
+        ftpWatts: true,
+        maxHeartRate: true,
+        weightKg: true,
+        thresholdPaceSecondsPerKm: true,
+      },
+    });
+    const thresholds = resolveAthleteThresholds(user);
+    const data = this.toPrismaFields(connectionId, activity, thresholds);
 
     const record = await this.db.client.activity.upsert({
       where: {
@@ -97,7 +112,23 @@ export class ActivityPersistenceService {
   private toPrismaFields(
     connectionId: string,
     activity: Activity,
+    thresholds: ReturnType<typeof resolveAthleteThresholds>,
   ): Prisma.ActivityUncheckedCreateInput {
+    const estimatedPowerWatts = estimateActivityPower({
+      activityType: activity.activityType,
+      durationSeconds: activity.durationSeconds,
+      distanceMeters: activity.distanceMeters ?? null,
+      elevationGainMeters: activity.elevationGainMeters ?? null,
+      averagePowerWatts: activity.averagePowerWatts ?? null,
+      normalizedPowerWatts: activity.normalizedPowerWatts ?? null,
+      weightKg: thresholds.weightKg,
+    });
+
+    const powerForTss =
+      activity.normalizedPowerWatts ??
+      activity.averagePowerWatts ??
+      estimatedPowerWatts;
+
     return {
       userId: activity.userId,
       connectionId,
@@ -127,15 +158,19 @@ export class ActivityPersistenceService {
       summaryPolyline: activity.summaryPolyline ?? null,
       deviceName: activity.deviceName ?? null,
       manual: activity.manual,
-      tss: calculateActivityTss({
-        durationSeconds: activity.durationSeconds,
-        activityType: activity.activityType,
-        averageHeartRate: activity.averageHeartRate ?? null,
-        maxHeartRate: activity.maxHeartRate ?? null,
-        averagePowerWatts: activity.averagePowerWatts ?? null,
-        normalizedPowerWatts: activity.normalizedPowerWatts ?? null,
-        averagePaceSecondsPerKm: activity.averagePaceSecondsPerKm ?? null,
-      }),
+      estimatedPowerWatts: estimatedPowerWatts ?? null,
+      tss: calculateActivityTss(
+        {
+          durationSeconds: activity.durationSeconds,
+          activityType: activity.activityType,
+          averageHeartRate: activity.averageHeartRate ?? null,
+          maxHeartRate: activity.maxHeartRate ?? null,
+          averagePowerWatts: powerForTss ?? null,
+          normalizedPowerWatts: activity.normalizedPowerWatts ?? null,
+          averagePaceSecondsPerKm: activity.averagePaceSecondsPerKm ?? null,
+        },
+        thresholds,
+      ),
     };
   }
 }

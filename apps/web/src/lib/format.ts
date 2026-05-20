@@ -36,3 +36,15 @@ export function formatDate(iso: string): string {
     year: 'numeric',
   });
 }
+
+/** Format YYYY-MM-DD without timezone shift (athlete-local calendar day). */
+export function formatCalendarDate(dateKey: string): string {
+  const [y, m, d] = dateKey.split('-').map((n) => parseInt(n, 10));
+  if (!y || !m || !d) return dateKey;
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}

@@ -40,7 +40,34 @@ createBullBoard({
   serverAdapter,
 });
 
+const boardUser = process.env['BULL_BOARD_USER'];
+const boardPassword = process.env['BULL_BOARD_PASSWORD'];
+
+function basicAuth(req: express.Request, res: express.Response, next: express.NextFunction): void {
+  if (!boardUser || !boardPassword) {
+    next();
+    return;
+  }
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Basic ')) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Bull Board"');
+    res.status(401).send('Authentication required');
+    return;
+  }
+  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  const sep = decoded.indexOf(':');
+  const user = sep >= 0 ? decoded.slice(0, sep) : decoded;
+  const pass = sep >= 0 ? decoded.slice(sep + 1) : '';
+  if (user === boardUser && pass === boardPassword) {
+    next();
+    return;
+  }
+  res.setHeader('WWW-Authenticate', 'Basic realm="Bull Board"');
+  res.status(401).send('Invalid credentials');
+}
+
 const app = express();
+app.use(basicAuth);
 app.use('/', serverAdapter.getRouter());
 
 app.listen(port, '0.0.0.0', () => {

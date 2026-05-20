@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import type {
   AnalyticsSummaryResponse,
+  BestEffortProgressionResponse,
   BestEffortsResponse,
+  HeartRateZone,
   TrainingLoadResponse,
   YearOverYearResponse,
   ZonesResponse,
@@ -10,14 +12,18 @@ import type {
 import {
   computeAcuteChronicRatio,
   computeHeartRateZones,
+  computeHeartRateZonesFromStream,
   computeMonotony,
   computePaceZones,
   computeYearOverYear,
+  extractBestEffortProgression,
   extractBestEfforts,
 } from '@trainlens/shared';
 import { DatabaseService } from '../database/database.service';
 import { CacheService } from '../cache/cache.service';
 import { DailyMetricsService } from './daily-metrics.service';
+import { extractHeartrateStream } from './streams.util';
+import { toBestEffortCandidates } from './best-effort-candidates.util';
 
 const CACHE_TTL_SECONDS = 300;
 
@@ -158,7 +164,7 @@ export class AnalyticsService {
   }
 
   async getBestEfforts(userId: string, activityType?: string): Promise<BestEffortsResponse> {
-    const activities = await this.db.client.activity.findMany({
+    const rows = await this.db.client.activity.findMany({
       where: {
         userId,
         deletedAt: null,
@@ -166,34 +172,103 @@ export class AnalyticsService {
       },
       select: {
         id: true,
+        name: true,
         activityType: true,
         startedAt: true,
+        timezone: true,
         durationSeconds: true,
         distanceMeters: true,
       },
     });
 
-    const efforts = extractBestEfforts(activities).map((e) => ({
-      ...e,
+    const candidates = await toBestEffortCandidates(this.db, rows);
+    const efforts = extractBestEfforts(candidates).map((e) => ({
+      distanceMeters: e.distanceMeters,
+      label: e.label,
+      durationSeconds: e.durationSeconds,
       achievedAt: e.achievedAt.toISOString(),
+      achievedOnLocal: e.achievedOnLocal,
+      activityId: e.activityId,
+      isEstimated: e.isEstimated,
+      ...(e.activityName ? { activityName: e.activityName } : {}),
     }));
 
     return { efforts };
   }
 
-  async getZones(userId: string, from?: string, to?: string): Promise<ZonesResponse> {
+  async getBestEffortProgression(
+    userId: string,
+    activityType?: string,
+    from?: string,
+    to?: string,
+  ): Promise<BestEffortProgressionResponse> {
+    const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
+    const fromDate = from
+      ? new Date(`${from}T00:00:00.000Z`)
+      : new Date(toDate.getTime() - 730 * 86_400_000);
+
+    const rows = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        startedAt: { gte: fromDate, lte: toDate },
+        ...(activityType && { activityType: activityType as never }),
+      },
+      select: {
+        id: true,
+        name: true,
+        activityType: true,
+        startedAt: true,
+        timezone: true,
+        durationSeconds: true,
+        distanceMeters: true,
+      },
+      orderBy: { startedAt: 'asc' },
+    });
+
+    const candidates = await toBestEffortCandidates(this.db, rows);
+    const series = extractBestEffortProgression(candidates).map((s) => ({
+      ...s,
+      points: s.points.map((p) => ({
+        label: p.label,
+        distanceMeters: p.distanceMeters,
+        achievedAt: p.achievedAt.toISOString(),
+        achievedOnLocal: p.achievedOnLocal,
+        durationSeconds: p.durationSeconds,
+        activityId: p.activityId,
+        isEstimated: p.isEstimated,
+      })),
+    }));
+
+    return { series };
+  }
+
+  async getZones(
+    userId: string,
+    from?: string,
+    to?: string,
+    activityType?: string,
+  ): Promise<ZonesResponse> {
     const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
     const fromDate = from
       ? new Date(`${from}T00:00:00.000Z`)
       : new Date(toDate.getTime() - 84 * 86_400_000);
+
+    const user = await this.db.client.user.findUnique({
+      where: { id: userId },
+      select: { maxHeartRate: true },
+    });
+    const maxHrEstimate = user?.maxHeartRate ?? 190;
 
     const activities = await this.db.client.activity.findMany({
       where: {
         userId,
         deletedAt: null,
         startedAt: { gte: fromDate, lte: toDate },
+        ...(activityType && { activityType: activityType as never }),
       },
       select: {
+        id: true,
         durationSeconds: true,
         averageHeartRate: true,
         maxHeartRate: true,
@@ -202,8 +277,51 @@ export class AnalyticsService {
       },
     });
 
+    const raws = await this.db.client.activityRawPayload.findMany({
+      where: { activityId: { in: activities.map((a) => a.id) } },
+      select: { activityId: true, payload: true },
+    });
+    const rawById = new Map(raws.map((r) => [r.activityId, r.payload]));
+
+    const streamZoneSeconds = new Map<1 | 2 | 3 | 4 | 5, number>();
+    let streamTotal = 0;
+
+    for (const a of activities) {
+      const stream = extractHeartrateStream(rawById.get(a.id));
+      if (!stream) continue;
+
+      const zones = computeHeartRateZonesFromStream(
+        stream.heartrate,
+        stream.timeSeconds,
+        maxHrEstimate,
+      );
+      for (const z of zones) {
+        streamZoneSeconds.set(z.zone, (streamZoneSeconds.get(z.zone) ?? 0) + z.durationSeconds);
+        streamTotal += z.durationSeconds;
+      }
+    }
+
+    let heartRate: HeartRateZone[];
+    if (streamTotal > 0) {
+      const template = computeHeartRateZonesFromStream(
+        [Math.round(maxHrEstimate * 0.75)],
+        undefined,
+        maxHrEstimate,
+      );
+      heartRate = template.map((z) => {
+        const durationSeconds = streamZoneSeconds.get(z.zone) ?? 0;
+        return {
+          ...z,
+          durationSeconds,
+          percentOfTotal: round1((durationSeconds / streamTotal) * 100),
+        };
+      });
+    } else {
+      heartRate = computeHeartRateZones(activities, maxHrEstimate);
+    }
+
     return {
-      heartRate: computeHeartRateZones(activities),
+      heartRate,
       pace: computePaceZones(activities),
     };
   }
@@ -255,6 +373,10 @@ export class AnalyticsService {
       .slice(0, 16);
     return `analytics:${userId}:${hash}`;
   }
+}
+
+function round1(n: number): number {
+  return Math.round(n * 10) / 10;
 }
 
 function startOfWeek(date: Date): Date {
