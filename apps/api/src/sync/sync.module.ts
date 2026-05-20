@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { QueueModule } from '../queue/queue.module';
 import { StravaModule } from '../strava/strava.module';
 import { ConnectionTokensService } from './connection-tokens.service';
@@ -12,7 +13,7 @@ import { SyncController, InternalSyncController } from './sync.controller';
 import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
 
 @Module({
-  imports: [QueueModule, StravaModule, AuthModule],
+  imports: [QueueModule, StravaModule, AuthModule, AnalyticsModule],
   controllers: [SyncController, InternalSyncController],
   providers: [
     ConnectionTokensService,

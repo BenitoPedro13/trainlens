@@ -19,9 +19,15 @@ export type { Connection, ConnectionStatus } from './types/connection.js';
 
 export type {
   ActivitySummary,
+  AnalyticsSummaryResponse,
+  ActivityListItem,
+  ActivityDetailResponse,
+  PaginatedActivitiesResponse,
   BestEffort,
   HeartRateZone,
+  SportDistributionItem,
   TrainingLoad,
+  WeeklyVolumePoint,
 } from './types/analytics.js';
 
 export {
