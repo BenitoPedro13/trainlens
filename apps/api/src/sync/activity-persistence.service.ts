@@ -10,10 +10,21 @@ export class ActivityPersistenceService {
   async upsertMany(connectionId: string, activities: Activity[]): Promise<number> {
     let count = 0;
     for (const activity of activities) {
-      await this.upsertOne(connectionId, activity);
+      await this.upsert(connectionId, activity);
       count++;
     }
     return count;
+  }
+
+  async upsert(connectionId: string, activity: Activity): Promise<void> {
+    await this.upsertOne(connectionId, activity);
+  }
+
+  async softDeleteByExternalId(userId: string, externalId: string): Promise<void> {
+    await this.db.client.activity.updateMany({
+      where: { userId, provider: 'strava', externalId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
   }
 
   private async upsertOne(connectionId: string, activity: Activity): Promise<void> {

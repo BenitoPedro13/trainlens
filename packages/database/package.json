@@ -15,9 +15,11 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:repair:timescale": "docker exec -i trainlens-postgres psql -U postgres -d fitness_analytics < scripts/repair-timescale-activity.sql",
+    "db:push": "dotenv -e ../../.env -- prisma db push",
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
     "db:setup": "tsx scripts/setup-db.ts"
   },
   "dependencies": {
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "dotenv-cli": "^11.0.0",
     "prisma": "^6.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0"

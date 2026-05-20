@@ -103,7 +103,7 @@ model Connection {
 }
 
 model Activity {
-  id           String       @id @default(cuid())
+  id           String       @default(cuid())
   userId       String
   connectionId String
   externalId   String
@@ -147,9 +147,9 @@ model Activity {
 
   user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   connection Connection         @relation(fields: [connectionId], references: [id])
-  rawPayload ActivityRawPayload?
 
-  // TimescaleDB hypertable: partition column must be in every unique index (ADR-002).
+  // TimescaleDB hypertable (ADR-002): PK and unique indexes must include startedAt.
+  @@id([id, startedAt])
   @@unique([userId, provider, externalId, startedAt])
   @@index([userId, startedAt(sort: Desc)])
   @@index([userId, activityType])
@@ -159,12 +159,11 @@ model Activity {
 
 model ActivityRawPayload {
   id         String   @id @default(cuid())
+  /// Logical link to Activity.id — no DB FK (TimescaleDB composite PK on Activity).
   activityId String   @unique
   provider   Provider
   payload    Json
   capturedAt DateTime @default(now())
-
-  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 }
 
 model DailyMetrics {
@@ -193,6 +192,8 @@ model WebhookEvent {
   id        String             @id @default(cuid())
   userId    String?
   provider  Provider
+  /** Dedup key: strava:{object_type}:{aspect_type}:{object_id}:{event_time} */
+  idempotencyKey String          @unique
   eventType String
   externalId String?
   objectType String?

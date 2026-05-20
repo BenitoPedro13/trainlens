@@ -19,6 +19,7 @@ export interface ActivitySyncJobData {
   userId: string;
   stravaActivityId: number;
   action: 'create' | 'update' | 'delete';
+  webhookEventId: string;
 }
 
 export interface WebhookIngestJobData {

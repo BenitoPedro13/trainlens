@@ -6,6 +6,8 @@ import { ConnectionTokensService } from './connection-tokens.service';
 import { ActivityPersistenceService } from './activity-persistence.service';
 import { SyncService } from './sync.service';
 import { BulkImportProcessor } from './processors/bulk-import.processor';
+import { WebhookIngestProcessor } from './processors/webhook-ingest.processor';
+import { ActivitySyncProcessor } from './processors/activity-sync.processor';
 import { SyncController, InternalSyncController } from './sync.controller';
 import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
 
@@ -17,6 +19,8 @@ import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
     ActivityPersistenceService,
     SyncService,
     BulkImportProcessor,
+    WebhookIngestProcessor,
+    ActivitySyncProcessor,
     InternalSecretGuard,
   ],
   exports: [SyncService],

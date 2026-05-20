@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import { QUEUE_NAMES, type BulkImportJobData } from '../queue/queue.constants';
+import {
+  QUEUE_NAMES,
+  type ActivitySyncJobData,
+  type BulkImportJobData,
+  type WebhookIngestJobData,
+} from '../queue/queue.constants';
 
 @Injectable()
 export class SyncService {
@@ -9,6 +14,10 @@ export class SyncService {
 
   constructor(
     @InjectQueue(QUEUE_NAMES.BULK_IMPORT) private readonly bulkImportQueue: Queue<BulkImportJobData>,
+    @InjectQueue(QUEUE_NAMES.WEBHOOK_INGEST)
+    private readonly webhookIngestQueue: Queue<WebhookIngestJobData>,
+    @InjectQueue(QUEUE_NAMES.ACTIVITY_SYNC)
+    private readonly activitySyncQueue: Queue<ActivitySyncJobData>,
   ) {}
 
   async enqueueBulkImport(
@@ -30,12 +39,27 @@ export class SyncService {
       afterTimestamp !== undefined ? { userId, afterTimestamp } : { userId };
 
     const job = await this.bulkImportQueue.add('bulk-import', jobData, {
-        jobId,
-        removeOnComplete: true,
-        removeOnFail: false,
-      },
-    );
+      jobId,
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
     this.logger.log(`Enqueued bulk import for user ${userId} (job ${job.id})`);
     return { jobId: job.id!, alreadyQueued: false };
+  }
+
+  async enqueueWebhookIngest(webhookEventId: string): Promise<void> {
+    await this.webhookIngestQueue.add(
+      'webhook-ingest',
+      { webhookEventId },
+      { jobId: `webhook-ingest-${webhookEventId}`, removeOnComplete: true },
+    );
+  }
+
+  async enqueueActivitySync(data: ActivitySyncJobData): Promise<void> {
+    const jobId = `activity-sync-${data.userId}-${data.stravaActivityId}-${data.action}`;
+    await this.activitySyncQueue.add('activity-sync', data, {
+      jobId,
+      removeOnComplete: true,
+    });
   }
 }

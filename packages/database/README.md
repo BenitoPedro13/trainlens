@@ -5,8 +5,9 @@ Prisma-based database package for TrainLens. Shared across `apps/api` and `apps/
 ## Setup
 
 ```bash
-cp .env.example .env   # fill in values once
+# .env lives at the monorepo root (../../.env from this package)
 pnpm db:setup          # starts Docker, migrates, configures TimescaleDB
+pnpm db:migrate        # create/apply migrations (loads root .env automatically)
 ```
 
 Add `--reset` to wipe and recreate the database from scratch:
@@ -22,10 +23,10 @@ pnpm db:setup:reset
 3. `prisma migrate deploy` — applies all pending migrations
 4. Converts the `Activity` table to a TimescaleDB hypertable
 
-> **TimescaleDB note:** The `Activity` hypertable requires `startedAt` in every unique
-> constraint. The PK becomes composite `(id, startedAt)` in the DB while Prisma schema
-> keeps `@id` on `id` for ergonomic queries. This divergence is intentional — see
-> [ADR-002](../../adrs/ADR-002.md).
+> **TimescaleDB note:** `Activity` uses `@@id([id, startedAt])` in the Prisma schema so
+> it matches the hypertable in Postgres. Do not let `prisma migrate dev` rewrite the PK
+> to `id` only — that breaks TimescaleDB (error TS103). If a migration fails, run
+> `pnpm db:repair:timescale` then `pnpm db:migrate:deploy`. See [ADR-002](../../adrs/ADR-002.md).
 
 ## Other scripts
 
