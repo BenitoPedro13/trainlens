@@ -37,6 +37,16 @@ async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+export function getSyncStatus(userId: string, email?: string | null) {
+  return apiFetch<{
+    provider: string;
+    status: string;
+    lastSyncedAt: string | null;
+    syncErrorMessage: string | null;
+    connected: boolean;
+  }>('/users/me/sync-status', userId, email);
+}
+
 export function getAnalyticsSummary(userId: string, email?: string | null) {
   return apiFetch<import('@trainlens/shared').AnalyticsSummaryResponse>(
     '/analytics/summary',

@@ -136,6 +136,11 @@ const config: NextAuthConfig = {
         let dbUserId: string;
 
         if (existing) {
+          const deleted = await prisma.user.findUnique({
+            where: { id: existing.userId },
+            select: { deletedAt: true },
+          });
+          if (deleted?.deletedAt) return false;
           dbUserId = existing.userId;
         } else {
           // First login: create a User row.

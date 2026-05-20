@@ -7,8 +7,13 @@ export interface DayAggregate {
   tss: number;
 }
 
+import { toLocalDateKey } from '@trainlens/shared';
+
 export interface ActivityMetricsInput {
   startedAt: Date;
+  /** Pre-resolved local calendar date (YYYY-MM-DD); preferred when set */
+  localDateKey?: string;
+  timezone?: string | null;
   distanceMeters: number | null;
   durationSeconds: number;
   elevationGainMeters: number | null;
@@ -22,7 +27,8 @@ export function aggregateActivitiesByDay(
   const byDate = new Map<string, DayAggregate>();
 
   for (const a of activities) {
-    const dateKey = a.startedAt.toISOString().slice(0, 10);
+    const dateKey =
+      a.localDateKey ?? toLocalDateKey(a.startedAt, a.timezone ?? undefined);
     const agg = byDate.get(dateKey) ?? {
       totalActivities: 0,
       totalDistanceMeters: 0,

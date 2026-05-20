@@ -8,7 +8,9 @@ import type {
   ZonesResponse,
 } from '@trainlens/shared';
 import {
+  computeAcuteChronicRatio,
   computeHeartRateZones,
+  computeMonotony,
   computePaceZones,
   computeYearOverYear,
   extractBestEfforts,
@@ -84,6 +86,19 @@ export class AnalyticsService {
 
     const sportGroups = await this.dailyMetrics.sportDistribution(userId, fromDate, toDate);
 
+    const weekAgoMetrics = new Date(toDate.getTime() - 7 * 86_400_000);
+    const recentMetrics = await this.db.client.dailyMetrics.findMany({
+      where: { userId, date: { gte: weekAgoMetrics, lte: toDate } },
+      orderBy: { date: 'asc' },
+      select: { date: true, tss: true, ctl: true, atl: true },
+    });
+    const monotony = computeMonotony(recentMetrics.map((m) => m.tss));
+    const latestLoad = [...recentMetrics].reverse().find((m) => m.ctl != null && m.atl != null);
+    const acuteChronicRatio = computeAcuteChronicRatio(
+      latestLoad?.atl ?? 0,
+      latestLoad?.ctl ?? 0,
+    );
+
     const response: AnalyticsSummaryResponse = {
       totalActivities: activities.length,
       totalDistanceMeters,
@@ -105,6 +120,8 @@ export class AnalyticsService {
         count: g.count,
         distanceMeters: g.distanceMeters,
       })),
+      monotony,
+      acuteChronicRatio,
     };
 
     await this.cache.set(cacheKey, response, CACHE_TTL_SECONDS);

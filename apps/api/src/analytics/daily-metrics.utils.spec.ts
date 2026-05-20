@@ -33,6 +33,32 @@ describe('aggregateActivitiesByDay', () => {
     });
   });
 
+  it('buckets by activity timezone instead of UTC midnight', () => {
+    const map = aggregateActivitiesByDay([
+      {
+        startedAt: new Date('2026-05-20T01:30:00.000Z'),
+        timezone: 'America/Sao_Paulo',
+        distanceMeters: 5000,
+        durationSeconds: 3600,
+        elevationGainMeters: 50,
+        calories: 400,
+        tss: 50,
+      },
+      {
+        startedAt: new Date('2026-05-20T17:00:00.000Z'),
+        timezone: 'America/Sao_Paulo',
+        distanceMeters: 13000,
+        durationSeconds: 3600,
+        elevationGainMeters: 100,
+        calories: 500,
+        tss: 60,
+      },
+    ]);
+
+    expect(map.get('2026-05-19')?.totalActivities).toBe(1);
+    expect(map.get('2026-05-20')?.totalActivities).toBe(1);
+  });
+
   it('treats null distance and calories as zero', () => {
     const map = aggregateActivitiesByDay([
       {

@@ -85,6 +85,10 @@ export interface SportDistributionItem {
 export interface AnalyticsSummaryResponse extends ActivitySummary {
   weeklyVolume: WeeklyVolumePoint[];
   sportDistribution: SportDistributionItem[];
+  /** Last 7 days with TSS > 0 (Sprint 4.11). */
+  monotony: number;
+  /** Latest ATL / CTL (Sprint 4.11). */
+  acuteChronicRatio: number;
 }
 
 export interface ActivityListItem {
@@ -106,6 +110,8 @@ export interface PaginatedActivitiesResponse {
   totalPages: number;
 }
 
+import type { ActivityLap } from './activity.js';
+
 export interface ActivityDetailResponse extends ActivityListItem {
   description: string | null;
   averageHeartRate: number | null;
@@ -116,5 +122,6 @@ export interface ActivityDetailResponse extends ActivityListItem {
   summaryPolyline: string | null;
   deviceName: string | null;
   manual: boolean;
+  laps?: ActivityLap[];
   rawPayload?: unknown;
 }

@@ -4,6 +4,10 @@ import { signOut } from '@/auth';
 const nav = [
   { href: '/dashboard' as const, label: 'Dashboard' },
   { href: '/activities' as const, label: 'Activities' },
+  { href: '/analytics/training-load' as const, label: 'Training load' },
+  { href: '/analytics/best-efforts' as const, label: 'Best efforts' },
+  { href: '/analytics/zones' as const, label: 'Zonas' },
+  { href: '/analytics/progress' as const, label: 'Progresso' },
   { href: '/settings' as const, label: 'Settings' },
 ];
 

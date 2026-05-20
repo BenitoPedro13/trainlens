@@ -4,6 +4,7 @@ import { computeTrainingLoadSeries, fillDailyTssTimeline } from '@trainlens/shar
 import { DatabaseService } from '../database/database.service';
 import { CacheService } from '../cache/cache.service';
 import { TssService } from './tss.service';
+import { resolveActivityLocalDateKey } from './activity-local-date.util.js';
 import { aggregateActivitiesByDay, computeStreaks as computeStreaksUtil } from './daily-metrics.utils.js';
 
 @Injectable()
@@ -19,13 +20,15 @@ export class DailyMetricsService {
   async recalculateForUser(userId: string, _fromDate?: Date): Promise<void> {
     await this.tss.backfillForUser(userId, { force: true });
 
-    const activities = await this.db.client.activity.findMany({
+    const rows = await this.db.client.activity.findMany({
       where: {
         userId,
         deletedAt: null,
       },
       select: {
+        id: true,
         startedAt: true,
+        timezone: true,
         distanceMeters: true,
         durationSeconds: true,
         elevationGainMeters: true,
@@ -34,6 +37,31 @@ export class DailyMetricsService {
       },
       orderBy: { startedAt: 'asc' },
     });
+
+    const needsRaw = rows.filter((r) => !r.timezone).map((r) => r.id);
+    const rawByActivityId = new Map<string, unknown>();
+    if (needsRaw.length > 0) {
+      const raws = await this.db.client.activityRawPayload.findMany({
+        where: { activityId: { in: needsRaw } },
+        select: { activityId: true, payload: true },
+      });
+      for (const r of raws) rawByActivityId.set(r.activityId, r.payload);
+    }
+
+    const activities = rows.map((r) => ({
+      startedAt: r.startedAt,
+      timezone: r.timezone,
+      localDateKey: resolveActivityLocalDateKey(
+        r.startedAt,
+        r.timezone,
+        rawByActivityId.get(r.id),
+      ),
+      distanceMeters: r.distanceMeters,
+      durationSeconds: r.durationSeconds,
+      elevationGainMeters: r.elevationGainMeters,
+      calories: r.calories,
+      tss: r.tss,
+    }));
 
     if (!activities.length) {
       await this.cache.deleteByPrefix(`analytics:${userId}:`);
@@ -131,19 +159,53 @@ export class DailyMetricsService {
     userId: string,
     year: number,
   ): Promise<Array<{ date: string; count: number; distanceMeters: number }>> {
-    const from = new Date(`${year}-01-01T00:00:00.000Z`);
-    const to = new Date(`${year}-12-31T23:59:59.999Z`);
+    // Wider UTC window so edge-of-year activities are included before local-date filter.
+    const queryFrom = new Date(`${year - 1}-12-01T00:00:00.000Z`);
+    const queryTo = new Date(`${year + 1}-01-15T23:59:59.999Z`);
 
-    const rows = await this.db.client.dailyMetrics.findMany({
-      where: { userId, date: { gte: from, lte: to }, totalActivities: { gt: 0 } },
-      orderBy: { date: 'asc' },
+    const rows = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        startedAt: { gte: queryFrom, lte: queryTo },
+      },
+      select: { id: true, startedAt: true, timezone: true, distanceMeters: true },
     });
 
-    return rows.map((r) => ({
-      date: r.date.toISOString().slice(0, 10),
-      count: r.totalActivities,
-      distanceMeters: r.totalDistanceMeters,
-    }));
+    const needsRaw = rows.filter((r) => !r.timezone).map((r) => r.id);
+    const rawByActivityId = new Map<string, unknown>();
+    if (needsRaw.length > 0) {
+      const raws = await this.db.client.activityRawPayload.findMany({
+        where: { activityId: { in: needsRaw } },
+        select: { activityId: true, payload: true },
+      });
+      for (const r of raws) rawByActivityId.set(r.activityId, r.payload);
+    }
+
+    const byDate = new Map<string, { count: number; distanceMeters: number }>();
+    const yearPrefix = `${year}-`;
+
+    for (const a of rows) {
+      const dateKey = resolveActivityLocalDateKey(
+        a.startedAt,
+        a.timezone,
+        rawByActivityId.get(a.id),
+      );
+      if (!dateKey.startsWith(yearPrefix)) continue;
+
+      const cell = byDate.get(dateKey) ?? { count: 0, distanceMeters: 0 };
+      cell.count += 1;
+      cell.distanceMeters += a.distanceMeters ?? 0;
+      byDate.set(dateKey, cell);
+    }
+
+    return [...byDate.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({
+        date,
+        count: v.count,
+        distanceMeters: v.distanceMeters,
+      }));
   }
 
   async sportDistribution(

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt, type StrategyOptionsWithoutRequest } from 'passport-jwt';
+import { DatabaseService } from '../database/database.service';
 
 export interface JwtPayload {
   /** Auth.js sets the userId as the JWT `sub` claim */
@@ -19,7 +20,7 @@ export interface RequestUser {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private readonly db: DatabaseService) {
     const opts: StrategyOptionsWithoutRequest = {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env['AUTH_SECRET'] ?? '',
@@ -29,7 +30,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super(opts);
   }
 
-  validate(payload: JwtPayload): RequestUser {
+  async validate(payload: JwtPayload): Promise<RequestUser> {
+    const user = await this.db.client.user.findUnique({
+      where: { id: payload.sub },
+      select: { deletedAt: true },
+    });
+    if (!user || user.deletedAt) {
+      throw new UnauthorizedException('Account unavailable');
+    }
     return {
       userId: payload.sub,
       ...(payload.email !== undefined ? { email: payload.email } : {}),

@@ -4,6 +4,7 @@ import { StatCard } from '@/components/stat-card';
 import { WeeklyVolumeChart } from '@/components/weekly-volume-chart';
 import { SportChart } from '@/components/sport-chart';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
+import { SyncStatusBanner } from '@/components/sync-status-banner';
 import { formatDistance, formatDuration } from '@/lib/format';
 
 export default async function DashboardPage() {
@@ -23,6 +24,8 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-gray-500">Resumo das suas atividades sincronizadas.</p>
       </div>
 
+      <SyncStatusBanner userId={userId} email={email} />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Atividades" value={String(summary.totalActivities)} />
         <StatCard label="Distância total" value={formatDistance(summary.totalDistanceMeters)} />
@@ -34,6 +37,16 @@ export default async function DashboardPage() {
           label="Sequência atual"
           value={`${summary.currentStreakDays} dias`}
           sub={`Recorde: ${summary.longestStreakDays} dias`}
+        />
+        <StatCard
+          label="Monotonia (7d)"
+          value={summary.monotony > 0 ? String(summary.monotony) : '—'}
+          sub="Média TSS / desvio (dias com carga)"
+        />
+        <StatCard
+          label="A:C ratio"
+          value={summary.acuteChronicRatio > 0 ? String(summary.acuteChronicRatio) : '—'}
+          sub="ATL / CTL (último dia com métricas)"
         />
       </div>
 

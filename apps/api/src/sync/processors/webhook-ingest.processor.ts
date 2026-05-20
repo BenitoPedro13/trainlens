@@ -95,11 +95,14 @@ export class WebhookIngestProcessor extends WorkerHost {
   ): Promise<void> {
     const authorized = payload.updates?.['authorized'];
     if (payload.aspect_type === 'update' && authorized === 'false') {
-      await this.db.client.connection.update({
-        where: { userId_provider: { userId, provider: 'strava' } },
-        data: { status: 'revoked', syncErrorMessage: 'Athlete deauthorized via Strava' },
-      });
-      this.logger.log(`Strava connection revoked for user ${userId}`);
+      await this.db.client.connection
+        .delete({
+          where: { userId_provider: { userId, provider: 'strava' } },
+        })
+        .catch(() => {
+          /* connection may already be removed */
+        });
+      this.logger.log(`Strava connection removed for user ${userId} (deauthorize)`);
     }
 
     await this.db.client.webhookEvent.update({

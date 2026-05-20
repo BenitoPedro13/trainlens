@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
 import { getActivity } from '@/lib/api-client';
+import { ActivityLapsTable } from '@/components/activity-laps-table';
 import { formatDate, formatDistance, formatDuration, formatPace } from '@/lib/format';
 
 const ActivityMap = dynamic(
@@ -63,6 +64,10 @@ export default async function ActivityDetailPage({ params }: { params: { id: str
           <DetailStat label="Calorias" value={String(Math.round(activity.calories))} />
         )}
       </div>
+
+      {activity.laps && activity.laps.length > 0 && (
+        <ActivityLapsTable laps={activity.laps} />
+      )}
 
       {activity.description && (
         <section className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">

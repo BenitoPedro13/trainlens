@@ -63,6 +63,8 @@ export interface Activity {
   sportCategory: SportCategory;
 
   startedAt: Date;
+  /** IANA timezone from provider (e.g. America/Sao_Paulo) for local-day bucketing */
+  timezone?: string;
   durationSeconds: number;
 
   distanceMeters?: number;

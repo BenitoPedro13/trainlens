@@ -11,6 +11,17 @@ export function formatDuration(seconds: number): string {
   return `${m}m`;
 }
 
+/** Clock time for PRs (e.g. 25:30 or 1:15:00). */
+export function formatDurationClock(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export function formatPace(secondsPerKm: number | null | undefined): string {
   if (secondsPerKm == null || secondsPerKm <= 0) return '—';
   const m = Math.floor(secondsPerKm / 60);

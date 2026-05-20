@@ -64,6 +64,10 @@ export type { ZoneActivityInput, HeartRateZoneResult, PaceZoneResult } from './a
 export { computeYearOverYear } from './analytics/year-over-year.js';
 export type { YearOverYearInputRow, YearOverYearBucket } from './analytics/year-over-year.js';
 
+export { computeMonotony, computeAcuteChronicRatio } from './analytics/monotony.js';
+
+export { toLocalDateKey, parseStravaTimezone } from './datetime/local-date.js';
+
 export {
   encrypt,
   decrypt,

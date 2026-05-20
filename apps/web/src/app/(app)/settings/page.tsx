@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth, signIn, signOut } from '@/auth';
 import { getUserSettings } from '@/lib/user-settings';
+import { SettingsAccountActions } from '@/components/settings-account-actions';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -96,6 +97,8 @@ export default async function SettingsPage() {
           </Link>
         </div>
       </section>
+
+      <SettingsAccountActions hasStrava={Boolean(connection)} />
 
       <section className="rounded-xl border border-red-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-900">Sessão</h2>

@@ -29,6 +29,9 @@ export interface StravaSummaryActivity {
   sport_type: string;
   description?: string | null;
   start_date: string;
+  /** Local start time (Strava); date portion is the athlete's calendar day */
+  start_date_local?: string;
+  timezone?: string;
   elapsed_time: number;
   moving_time: number;
   distance: number;

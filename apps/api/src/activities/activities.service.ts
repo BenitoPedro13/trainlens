@@ -6,6 +6,7 @@ import type {
   PaginatedActivitiesResponse,
 } from '@trainlens/shared';
 import { DatabaseService } from '../database/database.service';
+import { extractLapsFromRawPayload } from './laps.util';
 
 export interface ListActivitiesParams {
   page: number;
@@ -93,11 +94,13 @@ export class ActivitiesService {
       manual: activity.manual,
     };
 
-    if (includeRaw) {
-      const raw = await this.db.client.activityRawPayload.findUnique({
-        where: { activityId: id },
-      });
-      if (raw) result.rawPayload = raw.payload;
+    const raw = await this.db.client.activityRawPayload.findUnique({
+      where: { activityId: id },
+    });
+    if (raw) {
+      const laps = extractLapsFromRawPayload(raw.payload);
+      if (laps?.length) result.laps = laps;
+      if (includeRaw) result.rawPayload = raw.payload;
     }
 
     return result;

@@ -24,6 +24,6 @@ import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
     ActivitySyncProcessor,
     InternalSecretGuard,
   ],
-  exports: [SyncService],
+  exports: [SyncService, ConnectionTokensService],
 })
 export class SyncModule {}

@@ -4,6 +4,7 @@
  */
 
 import type { Activity, ActivityType, ActivityLap, ActivityStream, SportCategory } from '@trainlens/shared';
+import { parseStravaTimezone } from '@trainlens/shared';
 import type {
   StravaSummaryActivity,
   StravaDetailActivity,
@@ -90,7 +91,7 @@ function normalizeCalories(raw: StravaSummaryActivity): number | undefined {
   return undefined;
 }
 
-function normalizeLap(lap: StravaLap): ActivityLap {
+export function normalizeLap(lap: StravaLap): ActivityLap {
   const pace = speedToPaceSecondsPerKm(lap.average_speed);
   return {
     index: lap.lap_index,
@@ -137,6 +138,9 @@ export function normalizeSummaryActivity(
     sportCategory: SPORT_CATEGORY_MAP[activityType] ?? 'other',
 
     startedAt: new Date(raw.start_date),
+    ...(raw.timezone && {
+      timezone: parseStravaTimezone(raw.timezone) ?? raw.timezone,
+    }),
     durationSeconds: raw.elapsed_time,
 
     ...(raw.distance > 0 && { distanceMeters: raw.distance }),
