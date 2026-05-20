@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import type { Job } from 'bullmq';
 import { QUEUE_NAMES, type WebhookIngestJobData } from '../../queue/queue.constants';
@@ -8,6 +8,7 @@ import {
   mapAspectToAction,
   type StravaWebhookEvent,
 } from '../../webhooks/strava-webhook.types';
+import { captureWorkerError } from '../../common/sentry.util';
 
 @Processor(QUEUE_NAMES.WEBHOOK_INGEST, { concurrency: 5 })
 export class WebhookIngestProcessor extends WorkerHost {
@@ -63,12 +64,28 @@ export class WebhookIngestProcessor extends WorkerHost {
       await this.markSkipped(webhookEventId, `Unknown object_type: ${payload.object_type}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      captureWorkerError(err, {
+        queue: QUEUE_NAMES.WEBHOOK_INGEST,
+        jobId: job.id,
+        jobName: job.name,
+        data: job.data,
+      });
       await this.db.client.webhookEvent.update({
         where: { id: webhookEventId },
         data: { status: 'failed', errorMessage: message },
       });
       throw err;
     }
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job<WebhookIngestJobData>, error: Error): void {
+    captureWorkerError(error, {
+      queue: QUEUE_NAMES.WEBHOOK_INGEST,
+      jobId: job.id,
+      jobName: job.name,
+      data: job.data,
+    });
   }
 
   private async handleAthleteEvent(

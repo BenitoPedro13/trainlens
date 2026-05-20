@@ -25,6 +25,8 @@
     "@nestjs/platform-fastify": "^10.0.0",
     "@nestjs/terminus": "^10.0.0",
     "@prisma/client": "^6.0.0",
+    "@sentry/nestjs": "^10.53.1",
+    "@sentry/node": "^10.53.1",
     "@trainlens/database": "workspace:*",
     "@trainlens/shared": "workspace:*",
     "bullmq": "^5.76.10",

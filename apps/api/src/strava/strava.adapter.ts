@@ -130,12 +130,68 @@ export class StravaAdapter implements FitnessProvider {
    * older or manually entered activities — failures are silently ignored.
    */
   async getActivityDetail(tokens: ProviderTokens, externalId: string): Promise<Activity> {
+    const { activity } = await this.getActivityDetailWithRaw(tokens, externalId);
+    return activity;
+  }
+
+  /**
+   * Same as getActivityDetail but also returns the raw Strava API payloads
+   * for storage in ActivityRawPayload (ADR-010).
+   */
+  async getActivityDetailWithRaw(
+    tokens: ProviderTokens,
+    externalId: string,
+  ): Promise<{ activity: Activity; rawPayload: Record<string, unknown> }> {
     const [detail, streams] = await Promise.all([
       this.get<StravaDetailActivity>(`/activities/${externalId}`, tokens.accessToken),
       this.fetchStreams(tokens.accessToken, externalId),
     ]);
 
-    return normalizeDetailActivity(detail, '', streams ?? undefined);
+    const rawPayload: Record<string, unknown> = { detail };
+    if (streams) rawPayload['streams'] = streams;
+
+    return {
+      activity: normalizeDetailActivity(detail, '', streams ?? undefined),
+      rawPayload,
+    };
+  }
+
+  /**
+   * Paginated activity list with raw Strava summaries (for bulk import raw storage).
+   */
+  async getActivitiesWithRaw(
+    tokens: ProviderTokens,
+    options: GetActivitiesOptions = {},
+  ): Promise<Array<{ activity: Activity; raw: StravaSummaryActivity }>> {
+    const { after, before, perPage = PAGE_SIZE } = options;
+
+    const params: Record<string, string> = { per_page: String(perPage) };
+    if (after) params['after'] = String(Math.floor(after.getTime() / 1000));
+    if (before) params['before'] = String(Math.floor(before.getTime() / 1000));
+
+    const results: Array<{ activity: Activity; raw: StravaSummaryActivity }> = [];
+    let page = options.page ?? 1;
+
+    while (true) {
+      params['page'] = String(page);
+      const batch = await this.get<StravaSummaryActivity[]>(
+        '/athlete/activities',
+        tokens.accessToken,
+        params,
+      );
+      if (!batch.length) break;
+
+      for (const raw of batch) {
+        results.push({ activity: normalizeSummaryActivity(raw, ''), raw });
+      }
+
+      if (batch.length < perPage) break;
+      page++;
+      await sleep(PAGE_DELAY_MS);
+    }
+
+    this.logger.log(`Fetched ${results.length} activities (with raw) from Strava`);
+    return results;
   }
 
   async refreshTokens(tokens: ProviderTokens): Promise<ProviderTokens> {

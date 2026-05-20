@@ -7,17 +7,38 @@ import { DatabaseService } from '../database/database.service';
 export class ActivityPersistenceService {
   constructor(private readonly db: DatabaseService) {}
 
-  async upsertMany(connectionId: string, activities: Activity[]): Promise<number> {
+  async upsertMany(
+    connectionId: string,
+    items: Array<{ activity: Activity; rawPayload?: Record<string, unknown> }>,
+  ): Promise<number> {
     let count = 0;
-    for (const activity of activities) {
-      await this.upsert(connectionId, activity);
+    for (const item of items) {
+      const activityId = await this.upsert(connectionId, item.activity);
+      if (item.rawPayload) {
+        await this.saveRawPayload(activityId, item.rawPayload);
+      }
       count++;
     }
     return count;
   }
 
-  async upsert(connectionId: string, activity: Activity): Promise<void> {
-    await this.upsertOne(connectionId, activity);
+  async upsert(connectionId: string, activity: Activity): Promise<string> {
+    return this.upsertOne(connectionId, activity);
+  }
+
+  async saveRawPayload(activityId: string, raw: Record<string, unknown>): Promise<void> {
+    await this.db.client.activityRawPayload.upsert({
+      where: { activityId },
+      create: {
+        activityId,
+        provider: 'strava',
+        payload: raw as unknown as Prisma.InputJsonValue,
+      },
+      update: {
+        payload: raw as unknown as Prisma.InputJsonValue,
+        capturedAt: new Date(),
+      },
+    });
   }
 
   async softDeleteByExternalId(userId: string, externalId: string): Promise<void> {
@@ -27,10 +48,10 @@ export class ActivityPersistenceService {
     });
   }
 
-  private async upsertOne(connectionId: string, activity: Activity): Promise<void> {
+  private async upsertOne(connectionId: string, activity: Activity): Promise<string> {
     const data = this.toPrismaFields(connectionId, activity);
 
-    await this.db.client.activity.upsert({
+    const record = await this.db.client.activity.upsert({
       where: {
         userId_provider_externalId_startedAt: {
           userId: activity.userId,
@@ -67,6 +88,8 @@ export class ActivityPersistenceService {
         updatedAt: new Date(),
       },
     });
+
+    return record.id;
   }
 
   private toPrismaFields(

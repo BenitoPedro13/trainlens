@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { LoggerModule } from 'nestjs-pino';
 import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
@@ -11,9 +12,11 @@ import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import type { NestModule, MiddlewareConsumer } from '@nestjs/common';
 
 const isDev = process.env['NODE_ENV'] !== 'production';
+const sentryEnabled = Boolean(process.env['SENTRY_DSN']);
 
 @Module({
   imports: [
+    ...(sentryEnabled ? [SentryModule.forRoot()] : []),
     LoggerModule.forRoot({
       pinoHttp: {
         customProps: (_req, _res) => ({ context: 'HTTP' }),

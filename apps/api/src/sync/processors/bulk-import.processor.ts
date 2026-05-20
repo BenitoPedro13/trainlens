@@ -7,6 +7,7 @@ import { StravaAdapter, StravaUnauthorizedError } from '../../strava/strava.adap
 import { ConnectionTokensService } from '../connection-tokens.service';
 import { ActivityPersistenceService } from '../activity-persistence.service';
 import { DatabaseService } from '../../database/database.service';
+import { captureWorkerError } from '../../common/sentry.util';
 
 @Processor(QUEUE_NAMES.BULK_IMPORT, { concurrency: 1 })
 export class BulkImportProcessor extends WorkerHost {
@@ -41,21 +42,21 @@ export class BulkImportProcessor extends WorkerHost {
       ...(connection.expiresAt && { expiresAt: connection.expiresAt }),
     };
 
-    let normalized: Activity[];
+    let items: Array<{ activity: Activity; rawPayload: Record<string, unknown> }>;
     try {
-      normalized = await this.fetchAllActivities(providerTokens, userId, fetchOptions);
+      items = await this.fetchAllActivities(providerTokens, userId, fetchOptions);
     } catch (err) {
       if (err instanceof StravaUnauthorizedError && connection.refreshToken) {
         this.logger.warn(`Access token expired for user ${userId} — refreshing`);
         providerTokens = await this.strava.refreshTokens(providerTokens);
         await this.tokens.updateStravaTokens(userId, providerTokens);
-        normalized = await this.fetchAllActivities(providerTokens, userId, fetchOptions);
+        items = await this.fetchAllActivities(providerTokens, userId, fetchOptions);
       } else {
         throw err;
       }
     }
 
-    const imported = await this.activities.upsertMany(connection.connectionId, normalized);
+    const imported = await this.activities.upsertMany(connection.connectionId, items);
 
     await this.db.client.connection.update({
       where: { id: connection.connectionId },
@@ -74,14 +75,23 @@ export class BulkImportProcessor extends WorkerHost {
     tokens: ProviderTokens,
     userId: string,
     options: GetActivitiesOptions,
-  ): Promise<Activity[]> {
-    const activities = await this.strava.getActivities(tokens, options);
-    return activities.map((a) => ({ ...a, userId }));
+  ): Promise<Array<{ activity: Activity; rawPayload: Record<string, unknown> }>> {
+    const rows = await this.strava.getActivitiesWithRaw(tokens, options);
+    return rows.map(({ activity, raw }) => ({
+      activity: { ...activity, userId },
+      rawPayload: { summary: raw },
+    }));
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job<BulkImportJobData>, error: Error): void {
     this.logger.error(`Bulk import failed for user ${job.data.userId}: ${error.message}`);
+    captureWorkerError(error, {
+      queue: QUEUE_NAMES.BULK_IMPORT,
+      jobId: job.id,
+      jobName: job.name,
+      data: job.data,
+    });
     void this.tokens.markSyncError(job.data.userId, error.message);
   }
 }
