@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Strava from 'next-auth/providers/strava';
 import { prisma } from '@/lib/db';
 import { upsertStravaConnection, getStravaTokens } from '@/lib/connections';
+import { triggerStravaBulkImport } from '@/lib/trigger-bulk-import';
 import { refreshStravaTokens, isTokenExpiringSoon } from '@/lib/strava-refresh';
 import { compare, hash } from 'bcryptjs';
 
@@ -164,6 +165,11 @@ const config: NextAuthConfig = {
           refreshToken: account.refresh_token ?? '',
           expiresAt: account.expires_at ?? 0,
           stravaAthleteId: athleteId,
+        });
+
+        // Fire-and-forget: import full Strava history in the background.
+        void triggerStravaBulkImport(dbUserId).catch((err) => {
+          console.error('[auth] Failed to enqueue Strava bulk import:', err);
         });
       }
       return true;

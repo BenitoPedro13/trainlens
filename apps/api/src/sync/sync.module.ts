@@ -1,0 +1,24 @@
+import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
+import { QueueModule } from '../queue/queue.module';
+import { StravaModule } from '../strava/strava.module';
+import { ConnectionTokensService } from './connection-tokens.service';
+import { ActivityPersistenceService } from './activity-persistence.service';
+import { SyncService } from './sync.service';
+import { BulkImportProcessor } from './processors/bulk-import.processor';
+import { SyncController, InternalSyncController } from './sync.controller';
+import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
+
+@Module({
+  imports: [QueueModule, StravaModule, AuthModule],
+  controllers: [SyncController, InternalSyncController],
+  providers: [
+    ConnectionTokensService,
+    ActivityPersistenceService,
+    SyncService,
+    BulkImportProcessor,
+    InternalSecretGuard,
+  ],
+  exports: [SyncService],
+})
+export class SyncModule {}

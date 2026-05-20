@@ -149,7 +149,8 @@ model Activity {
   connection Connection         @relation(fields: [connectionId], references: [id])
   rawPayload ActivityRawPayload?
 
-  @@unique([userId, provider, externalId])
+  // TimescaleDB hypertable: partition column must be in every unique index (ADR-002).
+  @@unique([userId, provider, externalId, startedAt])
   @@index([userId, startedAt(sort: Desc)])
   @@index([userId, activityType])
   @@index([connectionId])
