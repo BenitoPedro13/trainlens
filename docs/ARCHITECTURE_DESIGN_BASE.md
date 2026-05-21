@@ -534,43 +534,46 @@ Two approaches, both used together:
 
 ## 15. Phased Roadmap
 
-### Phase 1: MVP (Strava only)
+### Phase 1: MVP (Strava only) ✅ Complete
 
-- [ ] Monorepo scaffold (Turborepo + pnpm)
-- [ ] Observability setup (Pino, Sentry, Bull Board)
-- [ ] Auth (login, Strava OAuth, JWT)
-- [ ] Activity sync (bulk import + webhook with idempotency)
-- [ ] Dashboard: weekly volume, activity calendar, sport distribution
-- [ ] Activity log with basic stats
-- [ ] Account settings: disconnect, data export, delete account
+- [x] Monorepo scaffold (Turborepo + pnpm)
+- [x] Observability setup (Pino, Sentry, Bull Board)
+- [x] Auth (login, Strava OAuth, JWT)
+- [x] Activity sync (bulk import + webhook with idempotency)
+- [x] Dashboard: weekly volume, activity calendar, sport distribution
+- [x] Activity log with basic stats
+- [x] Account settings: disconnect, data export, delete account
 
-### Phase 2: Analytics Core
+### Phase 2: Analytics Core ✅ Complete
 
-- [ ] Training load chart (CTL/ATL/TSB)
-- [ ] Best efforts & PR progression
-- [ ] Heart rate zone analysis
-- [ ] Pace/power distribution
-- [ ] Year-over-year comparison
+- [x] Training load chart (CTL/ATL/TSB)
+- [x] Best efforts & PR progression
+- [x] Heart rate zone analysis
+- [x] Pace/power zone distribution (pace histogram deferred)
+- [x] Year-over-year comparison
 
-### Phase 3: Geo & Routes
+### Phase 3: Segments & Geo (Sprint 7–9)
 
-- [ ] Activity heatmap (Leaflet)
+- [ ] Segment efforts sync & leaderboards — ADR-017
+- [ ] Personal geo heatmap (PostGIS tiles) — ADR-016
 - [ ] Route clustering & most-run routes
 - [ ] Elevation archives
 
-### Phase 4: Multi-source
+### Phase 4: Goals & Intelligence (Sprint 8–11)
+
+- [ ] Goals & targets (custom, progress tracking) — ADR-019
+- [ ] AI workout insights (per-activity summaries) — ADR-018
+- [ ] Training plan builder (templates, adherence) — ADR-020
+- [ ] Race time predictor
+- [ ] Anomaly detection (unusual spikes)
+- [ ] Weekly digest email
+
+### Phase 5: Multi-source (Sprint 12+)
 
 - [ ] Garmin Connect adapter
 - [ ] Apple Health import (CSV/XML)
 - [ ] Polar Flow adapter
 - [ ] Deduplication logic (same activity from multiple sources)
-
-### Phase 5: Intelligence
-
-- [ ] Race time predictor
-- [ ] Training plan builder
-- [ ] Anomaly detection (unusual spikes)
-- [ ] Weekly digest email
 
 ---
 

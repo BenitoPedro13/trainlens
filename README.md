@@ -6,7 +6,7 @@
 
 **TrainLens** is a free, multi-source fitness analytics platform that ingests exercise data from providers like Strava, Garmin, Apple Health, and Polar, and turns raw activity data into meaningful, actionable insights for athletes of all levels.
 
-> **Status:** Pre-implementation — architecture and ADRs are defined; application code is not yet scaffolded.
+> **Status:** MVP complete (Sprints 0–6) — auth, Strava sync, dashboard, analytics, and account settings are fully functional. Sprints 7–11 (Segments, Goals, Spatial, AI Insights, Training Plans) are next.
 
 ---
 
@@ -88,7 +88,7 @@ TrainLens follows an **adapter-first** design: every data source is a pluggable 
 - **Observable** — structured logging, error tracking, and job monitoring from day one
 - **Monorepo** — shared types and contracts prevent drift as the team grows
 
-For the full design document, see [`adrs/ARCHITECTURE_DESIGN_BASE.md`](adrs/ARCHITECTURE_DESIGN_BASE.md).
+For the full design document, see [`docs/ARCHITECTURE_DESIGN_BASE.md`](docs/ARCHITECTURE_DESIGN_BASE.md).
 
 ---
 
@@ -111,22 +111,20 @@ For the full design document, see [`adrs/ARCHITECTURE_DESIGN_BASE.md`](adrs/ARCH
 
 ## Repository Structure
 
-Planned monorepo layout (see [ADR-001](adrs/ADR-001.md)):
+Monorepo layout (see [ADR-001](adrs/ADR-001.md)):
 
 ```
 trainlens/
 ├── apps/
-│   ├── web/                 # Next.js frontend
+│   ├── web/                 # Next.js frontend (App Router)
 │   └── api/                 # NestJS backend
 ├── packages/
-│   ├── database/            # Prisma schema + client
+│   ├── database/            # Prisma schema + migrations + client
 │   ├── shared/              # Domain types, FitnessProvider interface, analytics formulas
-│   └── ui/                  # Shared React components
-├── infra/
-│   ├── docker-compose.yml
-│   └── docker-compose.prod.yml
-├── adrs/                    # Architectural Decision Records
-├── docs/                    # Detailed sub-documents (planned)
+│   └── ui/                  # Shared React components (placeholder)
+├── adrs/                    # Architectural Decision Records (ADR-001 – ADR-020)
+├── docs/                    # Architecture design doc, MVP status, roadmap
+├── docker-compose.yml       # Local dev stack (PostgreSQL/TimescaleDB + Redis)
 ├── turbo.json
 ├── pnpm-workspace.yaml
 └── package.json
@@ -146,8 +144,6 @@ trainlens/
 ---
 
 ## Getting Started
-
-> The monorepo scaffold is not yet in place. The steps below describe the intended workflow once `apps/` and `packages/` exist.
 
 ### 1. Clone and install
 
@@ -208,7 +204,7 @@ Never commit `.env` or secrets. See [ADR-011](adrs/ADR-011.md) for token encrypt
 
 ## Development
 
-### Common commands (planned)
+### Common commands
 
 ```bash
 pnpm dev              # Start all apps in development mode
@@ -216,7 +212,7 @@ pnpm build            # Production build (Turborepo pipeline)
 pnpm lint             # ESLint across the monorepo
 pnpm typecheck        # tsc --noEmit in all packages
 pnpm test             # Unit + integration tests
-pnpm test:e2e         # Playwright E2E (requires Docker stack)
+pnpm test:e2e         # Playwright E2E (requires Docker stack — not yet implemented)
 ```
 
 ### Strava OAuth flow (summary)
@@ -256,14 +252,19 @@ Target CI pipeline: **under 5 minutes** for lint, typecheck, unit, adapter, inte
 - **Auth:** Bearer JWT from Auth.js session
 - **Versioning:** URL prefix; v1 deprecated with `Deprecation` header before removal
 
-Example endpoints (planned):
+Key endpoints:
 
-| Method | Path                              | Description                |
-| ------ | --------------------------------- | -------------------------- |
-| `GET`  | `/api/v1/activities`              | List user activities       |
-| `GET`  | `/api/v1/analytics/daily-metrics` | Pre-aggregated daily stats |
-| `POST` | `/api/v1/webhooks/strava`         | Strava webhook receiver    |
-| `GET`  | `/health`                         | DB, Redis, queue health    |
+| Method  | Path                                     | Description                        |
+| ------- | ---------------------------------------- | ---------------------------------- |
+| `GET`   | `/api/v1/activities`                     | List user activities (paginated)   |
+| `GET`   | `/api/v1/activities/:id`                 | Activity detail with laps          |
+| `GET`   | `/api/v1/analytics/summary`              | Weekly volume, streaks (cached)    |
+| `GET`   | `/api/v1/analytics/training-load`        | CTL/ATL/TSB time-series            |
+| `GET`   | `/api/v1/analytics/best-efforts`         | PRs at standard distances          |
+| `GET`   | `/api/v1/analytics/zones`                | HR + pace zone breakdowns          |
+| `GET`   | `/api/v1/analytics/year-over-year`       | YoY comparison                     |
+| `POST`  | `/api/v1/webhooks/strava`                | Strava webhook receiver            |
+| `GET`   | `/health`                                | DB, Redis, PostGIS health check    |
 
 ---
 
@@ -281,15 +282,15 @@ Example endpoints (planned):
 
 ## Roadmap
 
-| Phase                | Focus                                                           |
-| -------------------- | --------------------------------------------------------------- |
-| **1 — MVP**          | Monorepo, auth, Strava sync, basic dashboard, account settings  |
-| **2 — Analytics**    | CTL/ATL/TSB, best efforts, HR zones, YoY comparison             |
-| **3 — Geo**          | Activity heatmap, route clustering, elevation                   |
-| **4 — Multi-source** | Garmin, Apple Health, Polar, deduplication                      |
-| **5 — Intelligence** | Race predictor, training plans, anomaly detection, digest email |
+| Phase                | Focus                                                           | Status       |
+| -------------------- | --------------------------------------------------------------- | ------------ |
+| **1 — MVP**          | Monorepo, auth, Strava sync, basic dashboard, account settings  | ✅ Complete  |
+| **2 — Analytics**    | CTL/ATL/TSB, best efforts, HR zones, YoY comparison             | ✅ Complete  |
+| **3 — Segments & Geo** | Segment efforts, leaderboards, geo heatmap, route clustering  | 🔜 Sprint 7–9 |
+| **4 — Goals & AI**   | Goals, AI workout insights, training plans                      | 🔜 Sprint 8–11 |
+| **5 — Multi-source** | Garmin, Apple Health, Polar, deduplication                      | 🔜 Sprint 12+ |
 
-Detailed checklist: [`adrs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap`](adrs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap).
+Detailed checklist: [`docs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap`](docs/ARCHITECTURE_DESIGN_BASE.md#15-phased-roadmap).
 
 ---
 
@@ -314,6 +315,11 @@ All significant technical decisions are documented as ADRs in [`adrs/`](adrs/):
 | [013](adrs/ADR-013.md) | Webhook idempotency                |
 | [014](adrs/ADR-014.md) | Data lifecycle & GDPR              |
 | [015](adrs/ADR-015.md) | Testing strategy                   |
+| [016](adrs/ADR-016.md) | Spatial data with PostGIS          |
+| [017](adrs/ADR-017.md) | Segment data model & sync          |
+| [018](adrs/ADR-018.md) | AI workout insights                |
+| [019](adrs/ADR-019.md) | Goals & targets                    |
+| [020](adrs/ADR-020.md) | Training plans                     |
 
 Use [`adrs/ADR-TEMPLATE.md`](adrs/ADR-TEMPLATE.md) for new decisions.
 
