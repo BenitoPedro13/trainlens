@@ -226,6 +226,39 @@ export function getSegment(userId: string, id: string, email?: string | null) {
   return apiFetch<SegmentDetail>(`/segments/${id}`, userId, email);
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  athleteName: string;
+  elapsedSeconds: number;
+  startDateLocal: string;
+}
+
+export interface LeaderboardResult {
+  effortCount: number;
+  entryCount: number;
+  entries: LeaderboardEntry[];
+}
+
+export interface EffortCompareResult {
+  effort1: SegmentEffortItem;
+  effort2: SegmentEffortItem;
+  diffSeconds: number;
+}
+
+export function getSegmentLeaderboard(userId: string, id: string, email?: string | null) {
+  return apiFetch<LeaderboardResult>(`/segments/${id}/leaderboard`, userId, email);
+}
+
+export function compareSegmentEfforts(
+  userId: string,
+  id: string,
+  e1: string,
+  e2: string,
+  email?: string | null,
+) {
+  return apiFetch<EffortCompareResult>(`/segments/${id}/compare?e1=${e1}&e2=${e2}`, userId, email);
+}
+
 export function getPaceHistogram(
   userId: string,
   params: { from?: string; to?: string; activityType?: string },

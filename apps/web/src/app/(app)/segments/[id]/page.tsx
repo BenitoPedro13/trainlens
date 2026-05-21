@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { getSegment, ApiError } from '@/lib/api-client';
 import { SegmentEffortChart } from '@/components/charts/segment-effort-chart';
+import { SegmentEffortCompare } from '@/components/segment-effort-compare';
 
-function formatDuration(seconds: number): string {
+function fmt(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
@@ -60,7 +61,7 @@ export default async function SegmentDetailPage({ params }: { params: { id: stri
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: 'Melhor tempo', value: pr ? formatDuration(pr.elapsedSeconds) : '—' },
+          { label: 'Melhor tempo', value: pr ? fmt(pr.elapsedSeconds) : '—' },
           { label: 'Esforços', value: String(segment.efforts.length) },
           { label: 'Incl. máxima', value: segment.maximumGrade != null ? `${segment.maximumGrade.toFixed(1)}%` : '—' },
           { label: 'Alt. máxima', value: segment.elevationHigh != null ? `${Math.round(segment.elevationHigh)} m` : '—' },
@@ -79,46 +80,13 @@ export default async function SegmentDetailPage({ params }: { params: { id: stri
         </section>
       )}
 
-      <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <h2 className="border-b border-gray-100 px-5 py-3 text-sm font-semibold text-gray-900">
-          Todos os esforços
-        </h2>
-        <table className="min-w-full divide-y divide-gray-100 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Data</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-500">Tempo</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-500">FC média</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-500">Potência</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-500">Rank PR</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {segment.efforts.map((effort) => (
-              <tr key={effort.id} className={effort.id === pr?.id ? 'bg-orange-50' : ''}>
-                <td className="px-4 py-2.5 text-gray-600">
-                  {new Date(effort.startDate).toLocaleDateString('pt-BR')}
-                  {effort.id === pr?.id && (
-                    <span className="ml-2 rounded bg-orange-100 px-1 text-xs text-orange-700">PR</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-gray-900">
-                  {formatDuration(effort.elapsedSeconds)}
-                </td>
-                <td className="px-4 py-2.5 text-right text-gray-600">
-                  {effort.averageHeartRate != null ? `${Math.round(effort.averageHeartRate)} bpm` : '—'}
-                </td>
-                <td className="px-4 py-2.5 text-right text-gray-600">
-                  {effort.averageWatts != null ? `${Math.round(effort.averageWatts)} W` : '—'}
-                </td>
-                <td className="px-4 py-2.5 text-right text-gray-500">
-                  {effort.prRank != null ? `#${effort.prRank}` : '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      <SegmentEffortCompare
+        segmentId={segment.id}
+        userId={session.user.id}
+        email={session.user.email}
+        efforts={segment.efforts}
+        prId={pr?.id ?? null}
+      />
     </div>
   );
 }

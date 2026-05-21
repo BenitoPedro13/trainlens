@@ -78,18 +78,18 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Missing
 | Strava deauthorize notification | ✅ | Marks connection `revoked`; sync-status banner shows reconnect link |
 | Auth edge-safe split | ✅ | `auth.config.ts` for middleware (no Prisma on Edge); 401 calls `signOut` |
 
-## Sprint 7 — Segments (complete core, partial advanced)
+## Sprint 7 — Segments (complete)
 
 | Task | Status | Notes |
 |------|--------|-------|
 | 7.1 Schema: Segment, SegmentEffort, SegmentLeaderboardSnapshot | ✅ | Migration `20260521052001_segments` |
 | 7.2 Extract efforts during activity sync | ✅ | `activity-sync.processor` calls `SegmentPersistenceService` |
-| 7.3 Backfill from existing ActivityRawPayload | ❌ | Not yet — no one-time backfill job |
-| 7.4 Lazy segment metadata fetch from Strava | ❌ | Queue registered; processor not built |
+| 7.3 Backfill from existing ActivityRawPayload | ✅ | `SegmentBackfillService` + `POST /internal/sync/backfill-segments` |
+| 7.4 Lazy segment metadata fetch from Strava | ✅ | `SegmentMetadataSyncProcessor` processes `segment-metadata-sync` queue |
 | 7.5 / 7.6 API: list + detail with efforts | ✅ | `GET /segments`, `GET /segments/:id` |
-| 7.7 Strava leaderboard endpoint | ❌ | Not yet |
+| 7.7 Strava leaderboard endpoint | ✅ | `GET /segments/:id/leaderboard` — fetches from Strava live |
 | 7.8 / 7.9 Segment detail + list pages | ✅ | `/segments`, `/segments/[id]` + effort progression chart |
-| 7.10 Matched efforts comparison | ❌ | Not yet |
+| 7.10 Matched efforts comparison | ✅ | `GET /segments/:id/compare?e1=&e2=` + click-to-select UI in detail page |
 
 ## Next: Sprint 8 — Goals & Targets
 

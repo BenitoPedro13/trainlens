@@ -4,7 +4,7 @@
 
 A personal fitness analytics platform. Ingests data from Strava (and eventually Garmin, Apple Health, Polar), stores it in TimescaleDB, and presents training insights: TSS, CTL/ATL/TSB, best efforts, HR zones, year-over-year, and more.
 
-**MVP (Sprints 0–6) complete. Sprint 7 (Segments) complete.** Sprint 8 (Goals) is next.
+**MVP (Sprints 0–6) complete. Sprint 7 (Segments) fully complete.** Sprint 8 (Goals) is next.
 
 ---
 

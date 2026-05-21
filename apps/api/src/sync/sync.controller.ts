@@ -4,6 +4,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { RequestUser } from '../auth/jwt.strategy';
 import { InternalSecretGuard } from '../common/guards/internal-secret.guard';
 import { SyncService } from './sync.service';
+import { SegmentBackfillService } from '../segments/segment-backfill.service';
 
 @Controller('sync')
 export class SyncController {
@@ -20,7 +21,10 @@ export class SyncController {
 
 @Controller('internal/sync')
 export class InternalSyncController {
-  constructor(private readonly sync: SyncService) {}
+  constructor(
+    private readonly sync: SyncService,
+    private readonly segmentBackfill: SegmentBackfillService,
+  ) {}
 
   /** Called by Next.js after Strava OAuth (server-to-server). */
   @Post('bulk-import')
@@ -28,5 +32,12 @@ export class InternalSyncController {
   @HttpCode(HttpStatus.ACCEPTED)
   triggerBulkInternal(@Body('userId') userId: string) {
     return this.sync.enqueueBulkImport(userId);
+  }
+
+  /** One-time backfill of segment efforts from stored raw payloads. */
+  @Post('backfill-segments')
+  @UseGuards(InternalSecretGuard)
+  backfillSegments(@Body('userId') userId: string) {
+    return this.segmentBackfill.runForUser(userId);
   }
 }

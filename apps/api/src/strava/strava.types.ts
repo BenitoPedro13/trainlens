@@ -104,6 +104,32 @@ export interface StravaStreamSet {
   latlng?: { data: [number, number][] };
 }
 
+/** Returned by GET /segments/:id */
+export interface StravaSegmentDetail extends StravaSegmentSummary {
+  total_elevation_gain: number;
+  athlete_segment_stats?: {
+    pr_elapsed_time: number | null;
+    pr_date: string | null;
+    effort_count: number;
+  };
+}
+
+export interface StravaLeaderboardEntry {
+  rank: number;
+  athlete_name: string;
+  athlete_id: number;
+  elapsed_time: number;
+  moving_time: number;
+  start_date_local: string;
+}
+
+/** Returned by GET /segments/:id/leaderboard */
+export interface StravaSegmentLeaderboard {
+  effort_count: number;
+  entry_count: number;
+  entries: StravaLeaderboardEntry[];
+}
+
 export interface StravaTokenResponse {
   access_token: string;
   refresh_token: string;

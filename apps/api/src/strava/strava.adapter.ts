@@ -12,6 +12,8 @@ import type {
   StravaStreamSet,
   StravaTokenResponse,
   StravaAthleteProfile,
+  StravaSegmentDetail,
+  StravaSegmentLeaderboard,
 } from './strava.types';
 import { normalizeSummaryActivity, normalizeDetailActivity } from './strava.normalizer';
 
@@ -221,6 +223,22 @@ export class StravaAdapter implements FitnessProvider {
       refreshToken: data.refresh_token,
       expiresAt: new Date(data.expires_at * 1000),
     };
+  }
+
+  async getSegmentById(tokens: ProviderTokens, segmentId: string): Promise<StravaSegmentDetail> {
+    return this.get<StravaSegmentDetail>(`/segments/${segmentId}`, tokens.accessToken);
+  }
+
+  async getSegmentLeaderboard(
+    tokens: ProviderTokens,
+    segmentId: string,
+    params?: Record<string, string>,
+  ): Promise<StravaSegmentLeaderboard> {
+    return this.get<StravaSegmentLeaderboard>(
+      `/segments/${segmentId}/leaderboard`,
+      tokens.accessToken,
+      params,
+    );
   }
 
   async revokeAccess(tokens: ProviderTokens): Promise<void> {

@@ -101,10 +101,11 @@ describe('StravaAdapter', () => {
       const activities = await adapter.getActivities(TOKENS);
 
       expect(activities).toHaveLength(1);
-      expect(activities[0].externalId).toBe('12345');
-      expect(activities[0].activityType).toBe('Run');
-      expect(activities[0].distanceMeters).toBe(10000);
-      expect(activities[0].averageHeartRate).toBe(155);
+      const act = activities[0]!;
+      expect(act.externalId).toBe('12345');
+      expect(act.activityType).toBe('Run');
+      expect(act.distanceMeters).toBe(10000);
+      expect(act.averageHeartRate).toBe(155);
     });
 
     it('throws StravaRateLimitError on 429', async () => {
@@ -142,7 +143,7 @@ describe('StravaAdapter', () => {
 
       expect(activity.externalId).toBe('12345');
       expect(activity.laps).toHaveLength(2);
-      expect(activity.laps![0].distanceMeters).toBe(5000);
+      expect(activity.laps![0]!.distanceMeters).toBe(5000);
       expect(activity.streams?.heartrate).toEqual([140, 150, 160, 155, 145]);
     });
 
