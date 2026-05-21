@@ -1,6 +1,6 @@
 # MVP Status (Sprints 0–6)
 
-> Last updated: 2026-05-20  
+> Last updated: 2026-05-21  
 > Canonical roadmap: [DEVELOPMENT_ROADMAP.md](../DEVELOPMENT_ROADMAP.md)
 
 Legend: ✅ Done · ⚠️ Partial · ❌ Missing
@@ -66,15 +66,31 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Missing
 |------|--------|-------|
 | 6.1–6.9 | ✅ | Export, disconnect, delete, throttler, error boundary, sync banner |
 
-## Remaining before Sprint 7
+## MVP Polish (completed post-Sprint 6)
 
-| Item | Notes |
-|------|-------|
-| TanStack Query on activities | Optional polish |
-| `packages/ui` extraction | Optional |
-| Run migration `20260520180000_user_thresholds_estimated_power` | Required after pull |
-| Re-sync or analytics recalc | Backfill `estimatedPowerWatts` + TSS with new thresholds |
+| Item | Status | Notes |
+|------|--------|-------|
+| TanStack Query on activities | ✅ | `useActivities` hook via `/api/proxy/activities` proxy |
+| `packages/ui` extraction | ✅ | 5 chart components moved; re-exported from `@trainlens/ui` |
+| Pace histogram | ✅ | `GET /analytics/pace-histogram` + chart on zones page |
+| Strava adapter HTTP fixtures | ✅ | nock-based unit tests in `strava.adapter.spec.ts` |
+| Data export background job | ✅ | `ExportJob` table + `data-export` BullMQ queue; async polling UX |
+| Strava deauthorize notification | ✅ | Marks connection `revoked`; sync-status banner shows reconnect link |
+| Auth edge-safe split | ✅ | `auth.config.ts` for middleware (no Prisma on Edge); 401 calls `signOut` |
 
-## Next: Sprint 7+ (parity)
+## Sprint 7 — Segments (complete core, partial advanced)
 
-Segments → Goals → Spatial → AI → Training Plans (ADRs 016–020).
+| Task | Status | Notes |
+|------|--------|-------|
+| 7.1 Schema: Segment, SegmentEffort, SegmentLeaderboardSnapshot | ✅ | Migration `20260521052001_segments` |
+| 7.2 Extract efforts during activity sync | ✅ | `activity-sync.processor` calls `SegmentPersistenceService` |
+| 7.3 Backfill from existing ActivityRawPayload | ❌ | Not yet — no one-time backfill job |
+| 7.4 Lazy segment metadata fetch from Strava | ❌ | Queue registered; processor not built |
+| 7.5 / 7.6 API: list + detail with efforts | ✅ | `GET /segments`, `GET /segments/:id` |
+| 7.7 Strava leaderboard endpoint | ❌ | Not yet |
+| 7.8 / 7.9 Segment detail + list pages | ✅ | `/segments`, `/segments/[id]` + effort progression chart |
+| 7.10 Matched efforts comparison | ❌ | Not yet |
+
+## Next: Sprint 8 — Goals & Targets
+
+Goals (Goal, GoalProgress) → progress engine → pace status → daily rollover job → dashboard widget → `/goals` page (ADR-019).

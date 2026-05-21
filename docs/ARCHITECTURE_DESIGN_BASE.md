@@ -549,15 +549,20 @@ Two approaches, both used together:
 - [x] Training load chart (CTL/ATL/TSB)
 - [x] Best efforts & PR progression
 - [x] Heart rate zone analysis
-- [x] Pace/power zone distribution (pace histogram deferred)
+- [x] Pace/power zone distribution (pace histogram — `GET /analytics/pace-histogram` + chart)
 - [x] Year-over-year comparison
 
 ### Phase 3: Segments & Geo (Sprint 7–9)
 
-- [ ] Segment efforts sync & leaderboards — ADR-017
-- [ ] Personal geo heatmap (PostGIS tiles) — ADR-016
-- [ ] Route clustering & most-run routes
-- [ ] Elevation archives
+- [x] Segment schema & migration (Segment, SegmentEffort, SegmentLeaderboardSnapshot)
+- [x] Segment efforts extracted during activity sync
+- [x] Segment list + detail API (`GET /segments`, `GET /segments/:id`)
+- [x] Segment list page (`/segments`) + detail page (`/segments/[id]`) with effort progression chart
+- [ ] Segment backfill from existing ActivityRawPayload — Sprint 7 remainder
+- [ ] Strava leaderboard endpoint (cached, filtered) — Sprint 7 remainder
+- [ ] Matched efforts side-by-side comparison — Sprint 7 remainder
+- [ ] Personal geo heatmap (PostGIS tiles) — ADR-016 (Sprint 9)
+- [ ] Route clustering & most-run routes — Sprint 9
 
 ### Phase 4: Goals & Intelligence (Sprint 8–11)
 
