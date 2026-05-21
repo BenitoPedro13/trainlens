@@ -21,7 +21,8 @@
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:push": "turbo run db:push",
-    "db:studio": "pnpm --filter @trainlens/database db:studio"
+    "db:studio": "pnpm --filter @trainlens/database db:studio",
+    "seed:dev": "node_modules/.bin/dotenv -e .env -- node_modules/.pnpm/node_modules/.bin/tsx scripts/seed-dev.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
