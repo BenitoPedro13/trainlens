@@ -6,14 +6,10 @@ import { upsertStravaConnection, getStravaTokens } from '@/lib/connections';
 import { triggerStravaBulkImport } from '@/lib/trigger-bulk-import';
 import { refreshStravaTokens, isTokenExpiringSoon } from '@/lib/strava-refresh';
 import { compare, hash } from 'bcryptjs';
+import { authConfig } from './auth.config';
 
 const config: NextAuthConfig = {
-  session: { strategy: 'jwt' },
-
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
+  ...authConfig,
 
   providers: [
     // ── Credentials (dev convenience) ────────────────────────────────────────

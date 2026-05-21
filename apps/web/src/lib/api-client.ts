@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { signOut } from '@/auth';
 import { createApiAccessToken } from './api-token';
 
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
@@ -31,8 +31,8 @@ async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    // Stale session or deleted account — bounce to login.
-    if (res.status === 401) redirect('/login');
+    // Stale session or deleted account — sign out and bounce to login.
+    if (res.status === 401) await signOut({ redirectTo: '/login' });
     const body = await res.text();
     throw new ApiError(body || res.statusText, res.status);
   }
