@@ -267,7 +267,7 @@ async function main() {
         externalId,
         startedAt: actDate,
       }},
-      update: {},
+      update: { deletedAt: null },
       create: {
         userId: user.id,
         connectionId: connection.id,

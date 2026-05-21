@@ -77,6 +77,7 @@ export class ActivityPersistenceService {
       },
       create: data,
       update: {
+        deletedAt: null,
         name: data.name,
         description: data.description ?? null,
         activityType: data.activityType,

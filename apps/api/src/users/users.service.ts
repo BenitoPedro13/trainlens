@@ -139,7 +139,11 @@ export class UsersService {
           data: { deletedAt: new Date() },
         });
       }
-      await this.db.client.dailyMetrics.deleteMany({ where: { userId } });
+      await Promise.all([
+        this.db.client.dailyMetrics.deleteMany({ where: { userId } }),
+        this.db.client.segmentEffort.deleteMany({ where: { userId } }),
+        this.db.client.segmentLeaderboardSnapshot.deleteMany({ where: { userId } }),
+      ]);
     }
 
     await this.db.client.connection.delete({
