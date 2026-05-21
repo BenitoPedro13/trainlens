@@ -9,6 +9,9 @@ import { ActivityPersistenceService } from '../activity-persistence.service';
 import { DatabaseService } from '../../database/database.service';
 import { captureWorkerError } from '../../common/sentry.util';
 import { AnalyticsRecalcService } from '../../analytics/analytics-recalc.service';
+import { SegmentPersistenceService } from '../../segments/segment-persistence.service';
+import { normalizeSegmentEffort } from '../../strava/strava.normalizer';
+import type { StravaDetailActivity } from '../../strava/strava.types';
 
 @Processor(QUEUE_NAMES.ACTIVITY_SYNC, { concurrency: 3 })
 export class ActivitySyncProcessor extends WorkerHost {
@@ -20,6 +23,7 @@ export class ActivitySyncProcessor extends WorkerHost {
     private readonly activities: ActivityPersistenceService,
     private readonly db: DatabaseService,
     private readonly analyticsRecalc: AnalyticsRecalcService,
+    private readonly segmentPersistence: SegmentPersistenceService,
   ) {
     super();
   }
@@ -66,6 +70,17 @@ export class ActivitySyncProcessor extends WorkerHost {
       userId,
     });
     await this.activities.saveRawPayload(activityId, detail.rawPayload);
+
+    const rawDetail = detail.rawPayload as unknown as StravaDetailActivity;
+    if (rawDetail.segment_efforts?.length) {
+      const normalized = rawDetail.segment_efforts.map((e) =>
+        normalizeSegmentEffort(e, String(stravaActivityId)),
+      );
+      await this.segmentPersistence.upsertEfforts(userId, normalized).catch((err) => {
+        this.logger.warn(`Segment effort persistence failed for activity ${stravaActivityId}: ${err}`);
+      });
+    }
+
     await this.finishWebhook(webhookEventId, userId);
   }
 

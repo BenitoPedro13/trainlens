@@ -10,6 +10,7 @@ import type {
   StravaDetailActivity,
   StravaStreamSet,
   StravaLap,
+  StravaSegmentEffort,
 } from './strava.types';
 
 // ── Activity type mapping ─────────────────────────────────────────────────────
@@ -113,6 +114,72 @@ function normalizeStreams(raw: StravaStreamSet): ActivityStream {
     ...(raw.watts?.data && { watts: raw.watts.data }),
     ...(raw.velocity_smooth?.data && { velocity_smooth: raw.velocity_smooth.data }),
     ...(raw.latlng?.data && { latlng: raw.latlng.data }),
+  };
+}
+
+// ── Segment effort normalizer ─────────────────────────────────────────────────
+
+export interface NormalizedSegmentEffort {
+  externalEffortId: string;
+  activityExternalId: string;
+  segment: {
+    externalId: string;
+    name: string;
+    activityType: ActivityType;
+    distanceMeters: number;
+    averageGrade?: number;
+    maximumGrade?: number;
+    elevationHigh?: number;
+    elevationLow?: number;
+    startLatitude?: number;
+    startLongitude?: number;
+    endLatitude?: number;
+    endLongitude?: number;
+    climbCategory?: number;
+    city?: string;
+    country?: string;
+    polyline?: string;
+  };
+  elapsedSeconds: number;
+  movingSeconds?: number;
+  startDate: Date;
+  averageWatts?: number;
+  averageHeartRate?: number;
+  maxHeartRate?: number;
+  prRank?: number;
+}
+
+export function normalizeSegmentEffort(
+  raw: StravaSegmentEffort,
+  activityExternalId: string,
+): NormalizedSegmentEffort {
+  const seg = raw.segment;
+  return {
+    externalEffortId: String(raw.id),
+    activityExternalId,
+    segment: {
+      externalId: String(seg.id),
+      name: seg.name,
+      activityType: toActivityType(seg.activity_type),
+      distanceMeters: seg.distance,
+      ...(seg.average_grade != null && { averageGrade: seg.average_grade }),
+      ...(seg.maximum_grade != null && { maximumGrade: seg.maximum_grade }),
+      ...(seg.elevation_high != null && { elevationHigh: seg.elevation_high }),
+      ...(seg.elevation_low != null && { elevationLow: seg.elevation_low }),
+      ...(seg.start_latlng?.length === 2 && { startLatitude: seg.start_latlng[0], startLongitude: seg.start_latlng[1] }),
+      ...(seg.end_latlng?.length === 2 && { endLatitude: seg.end_latlng[0], endLongitude: seg.end_latlng[1] }),
+      ...(seg.climb_category != null && { climbCategory: seg.climb_category }),
+      ...(seg.city && { city: seg.city }),
+      ...(seg.country && { country: seg.country }),
+      ...(seg.map?.polyline && { polyline: seg.map.polyline }),
+    },
+    elapsedSeconds: raw.elapsed_time,
+    movingSeconds: raw.moving_time,
+    startDate: new Date(raw.start_date),
+    ...(raw.average_watts != null && { averageWatts: raw.average_watts }),
+    ...(raw.average_heartrate != null && { averageHeartRate: raw.average_heartrate }),
+    ...(raw.max_heartrate != null && { maxHeartRate: raw.max_heartrate }),
+    ...(raw.pr_rank != null && { prRank: raw.pr_rank }),
   };
 }
 

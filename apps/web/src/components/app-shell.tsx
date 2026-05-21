@@ -8,6 +8,7 @@ const nav = [
   { href: '/analytics/best-efforts' as const, label: 'Best efforts' },
   { href: '/analytics/zones' as const, label: 'Zonas' },
   { href: '/analytics/progress' as const, label: 'Progresso' },
+  { href: '/segments' as const, label: 'Segmentos' },
   { href: '/settings' as const, label: 'Settings' },
 ];
 

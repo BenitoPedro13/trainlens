@@ -177,6 +177,55 @@ export function getYearOverYear(
   );
 }
 
+export interface SegmentListItem {
+  id: string;
+  externalId: string;
+  name: string;
+  activityType: string;
+  distanceMeters: number;
+  averageGrade: number | null;
+  climbCategory: number | null;
+  city: string | null;
+  country: string | null;
+  prElapsedSeconds: number | null;
+  prDate: string | null;
+  effortCount: number;
+}
+
+export interface SegmentEffortItem {
+  id: string;
+  elapsedSeconds: number;
+  movingSeconds: number | null;
+  startDate: string;
+  averageWatts: number | null;
+  averageHeartRate: number | null;
+  prRank: number | null;
+}
+
+export interface SegmentDetail {
+  id: string;
+  externalId: string;
+  name: string;
+  activityType: string;
+  distanceMeters: number;
+  averageGrade: number | null;
+  maximumGrade: number | null;
+  elevationHigh: number | null;
+  elevationLow: number | null;
+  climbCategory: number | null;
+  city: string | null;
+  country: string | null;
+  efforts: SegmentEffortItem[];
+}
+
+export function listSegments(userId: string, email?: string | null) {
+  return apiFetch<SegmentListItem[]>('/segments', userId, email);
+}
+
+export function getSegment(userId: string, id: string, email?: string | null) {
+  return apiFetch<SegmentDetail>(`/segments/${id}`, userId, email);
+}
+
 export function getPaceHistogram(
   userId: string,
   params: { from?: string; to?: string; activityType?: string },

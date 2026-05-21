@@ -56,9 +56,40 @@ export interface StravaSummaryActivity {
   trainer: boolean;
 }
 
+export interface StravaSegmentSummary {
+  id: number;
+  name: string;
+  activity_type: string;
+  distance: number;
+  average_grade: number;
+  maximum_grade: number;
+  elevation_high: number;
+  elevation_low: number;
+  start_latlng: [number, number] | null;
+  end_latlng: [number, number] | null;
+  climb_category: number;
+  city: string | null;
+  country: string | null;
+  map?: { polyline?: string };
+}
+
+export interface StravaSegmentEffort {
+  id: number;
+  segment: StravaSegmentSummary;
+  name: string;
+  elapsed_time: number;
+  moving_time: number;
+  start_date: string;
+  average_watts?: number | null;
+  average_heartrate?: number | null;
+  max_heartrate?: number | null;
+  pr_rank?: number | null;
+}
+
 /** Returned by GET /activities/:id (detail — adds laps) */
 export interface StravaDetailActivity extends StravaSummaryActivity {
   laps: StravaLap[];
+  segment_efforts?: StravaSegmentEffort[];
 }
 
 /** Returned by GET /activities/:id/streams */

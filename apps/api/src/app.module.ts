@@ -15,6 +15,7 @@ import { CacheModule } from './cache/cache.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { UsersModule } from './users/users.module';
+import { SegmentsModule } from './segments/segments.module';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import type { NestModule, MiddlewareConsumer } from '@nestjs/common';
 
@@ -46,6 +47,7 @@ const sentryEnabled = Boolean(process.env['SENTRY_DSN']);
     ActivitiesModule,
     AnalyticsModule,
     UsersModule,
+    SegmentsModule,
     HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

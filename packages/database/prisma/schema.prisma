@@ -77,6 +77,8 @@ model User {
   dailyMetrics DailyMetrics[]
   webhookEvents WebhookEvent[]
   exportJobs   ExportJob[]
+  segmentEfforts SegmentEffort[]
+  segmentLeaderboard SegmentLeaderboardSnapshot[]
 
   @@index([email])
   @@index([deletedAt])
@@ -216,6 +218,75 @@ model ExportJob {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([status, expiresAt])
+}
+
+model Segment {
+  id               String   @id @default(cuid())
+  externalId       String   @unique
+  provider         Provider
+  name             String
+  activityType     ActivityType
+  distanceMeters   Float
+  averageGrade     Float?
+  maximumGrade     Float?
+  elevationHigh    Float?
+  elevationLow     Float?
+  startLatitude    Float?
+  startLongitude   Float?
+  endLatitude      Float?
+  endLongitude     Float?
+  climbCategory    Int?
+  city             String?
+  country          String?
+  polyline         String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  efforts          SegmentEffort[]
+  leaderboard      SegmentLeaderboardSnapshot[]
+
+  @@index([provider, activityType])
+}
+
+model SegmentEffort {
+  id                  String   @id @default(cuid())
+  userId              String
+  segmentId           String
+  activityExternalId  String
+  externalEffortId    String   @unique
+
+  elapsedSeconds      Int
+  movingSeconds       Int?
+  startDate           DateTime
+  averageWatts        Float?
+  averageHeartRate    Float?
+  maxHeartRate        Float?
+  prRank              Int?
+
+  createdAt           DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  segment Segment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, segmentId, startDate(sort: Desc)])
+  @@index([segmentId, elapsedSeconds])
+}
+
+model SegmentLeaderboardSnapshot {
+  id              String   @id @default(cuid())
+  segmentId       String
+  userId          String
+  rank            Int
+  elapsedSeconds  Int
+  athleteName     String?
+  capturedAt      DateTime @default(now())
+
+  segment Segment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([segmentId, capturedAt(sort: Desc)])
+  @@index([userId])
 }
 
 model WebhookEvent {

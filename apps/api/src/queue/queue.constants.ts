@@ -4,6 +4,7 @@ export const QUEUE_NAMES = {
   WEBHOOK_INGEST: 'webhook-ingest',
   ANALYTICS_RECALC: 'analytics-recalc',
   DATA_EXPORT: 'data-export',
+  SEGMENT_METADATA_SYNC: 'segment-metadata-sync',
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -36,4 +37,9 @@ export interface AnalyticsRecalcJobData {
 export interface DataExportJobData {
   userId: string;
   exportJobId: string;
+}
+
+export interface SegmentMetadataSyncJobData {
+  segmentExternalId: string;
+  userId: string;
 }
