@@ -8,7 +8,9 @@ const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 
 async function apiToken() {
   const session = await auth();
-  if (!session?.user?.id) throw new Error('Not authenticated');
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
   const token = await createApiAccessToken(session.user.id, session.user.email);
   return token;
 }
