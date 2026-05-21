@@ -1,3 +1,5 @@
-// Placeholder — shared chart and UI components will live here in Sprint 5.
-// See DEVELOPMENT_ROADMAP.md Sprint 5: Analytics UI
-export {};
+export { TrainingLoadChart } from './charts/training-load-chart.js';
+export { YearOverYearChart } from './charts/yoy-chart.js';
+export { ZoneBars } from './charts/zone-bars.js';
+export { PaceHistogramChart } from './charts/pace-histogram-chart.js';
+export { BestEffortProgressionChart } from './charts/best-effort-progression-chart.js';

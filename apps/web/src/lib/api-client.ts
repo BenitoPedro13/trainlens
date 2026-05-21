@@ -173,3 +173,20 @@ export function getYearOverYear(
     email,
   );
 }
+
+export function getPaceHistogram(
+  userId: string,
+  params: { from?: string; to?: string; activityType?: string },
+  email?: string | null,
+) {
+  const q = new URLSearchParams();
+  if (params.from) q.set('from', params.from);
+  if (params.to) q.set('to', params.to);
+  if (params.activityType) q.set('activityType', params.activityType);
+  const qs = q.toString();
+  return apiFetch<import('@trainlens/shared').PaceHistogramResponse>(
+    `/analytics/pace-histogram${qs ? `?${qs}` : ''}`,
+    userId,
+    email,
+  );
+}

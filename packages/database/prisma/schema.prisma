@@ -76,6 +76,7 @@ model User {
   activities   Activity[]
   dailyMetrics DailyMetrics[]
   webhookEvents WebhookEvent[]
+  exportJobs   ExportJob[]
 
   @@index([email])
   @@index([deletedAt])
@@ -193,6 +194,28 @@ model DailyMetrics {
 
   @@unique([userId, date])
   @@index([userId, date(sort: Desc)])
+}
+
+enum ExportJobStatus {
+  pending
+  processing
+  ready
+  failed
+}
+
+model ExportJob {
+  id          String          @id @default(cuid())
+  userId      String
+  status      ExportJobStatus @default(pending)
+  errorMessage String?
+  expiresAt   DateTime?
+  createdAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
 }
 
 model WebhookEvent {

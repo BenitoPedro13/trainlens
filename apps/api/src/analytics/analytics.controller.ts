@@ -3,6 +3,7 @@ import type {
   AnalyticsSummaryResponse,
   BestEffortProgressionResponse,
   BestEffortsResponse,
+  PaceHistogramResponse,
   TrainingLoadResponse,
   YearOverYearResponse,
   ZonesResponse,
@@ -85,5 +86,15 @@ export class AnalyticsController {
   ): Promise<YearOverYearResponse> {
     const m = mode === 'month' ? 'month' : 'week';
     return this.analytics.getYearOverYear(user.userId, m, from, to);
+  }
+
+  @Get('pace-histogram')
+  getPaceHistogram(
+    @CurrentUser() user: RequestUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('activityType') activityType?: string,
+  ): Promise<PaceHistogramResponse> {
+    return this.analytics.getPaceHistogram(user.userId, from, to, activityType);
   }
 }

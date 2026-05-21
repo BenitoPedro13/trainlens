@@ -4,14 +4,65 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import {
   disconnectStrava,
-  exportAccountData,
+  requestExport,
+  getExportStatus,
+  downloadExport,
   deleteAccount,
 } from '@/lib/account-actions';
+
+type ExportState = 'idle' | 'requesting' | 'processing' | 'downloading' | 'done' | 'error';
+
+const EXPORT_LABELS: Record<ExportState, string> = {
+  idle: 'Exportar JSON',
+  requesting: 'A solicitar…',
+  processing: 'A preparar exportação…',
+  downloading: 'A descarregar…',
+  done: 'Exportação concluída',
+  error: 'Erro — tentar novamente',
+};
 
 export function SettingsAccountActions({ hasStrava }: { hasStrava: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [exportState, setExportState] = useState<ExportState>('idle');
+
+  async function handleExport() {
+    setMessage(null);
+    setExportState('requesting');
+    try {
+      const { exportJobId } = await requestExport();
+      setExportState('processing');
+
+      // Poll until ready or failed
+      let status = 'processing';
+      while (status === 'pending' || status === 'processing') {
+        await new Promise((r) => setTimeout(r, 2000));
+        const result = await getExportStatus(exportJobId);
+        status = result.status;
+        if (status === 'failed') {
+          setExportState('error');
+          setMessage(result.errorMessage ?? 'Falha ao exportar. Tente novamente.');
+          return;
+        }
+      }
+
+      setExportState('downloading');
+      const json = await downloadExport(exportJobId);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trainlens-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExportState('done');
+      setMessage('Exportação concluída.');
+    } catch {
+      setExportState('error');
+      setMessage('Falha ao exportar. Tente novamente.');
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -26,28 +77,14 @@ export function SettingsAccountActions({ hasStrava }: { hasStrava: boolean }) {
         </p>
         <button
           type="button"
-          disabled={pending}
+          disabled={pending || (exportState !== 'idle' && exportState !== 'done' && exportState !== 'error')}
           className="mt-4 rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          onClick={() =>
-            startTransition(async () => {
-              setMessage(null);
-              try {
-                const json = await exportAccountData();
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `trainlens-export-${new Date().toISOString().slice(0, 10)}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                setMessage('Exportação concluída.');
-              } catch {
-                setMessage('Falha ao exportar. Tente novamente.');
-              }
-            })
-          }
+          onClick={() => {
+            setExportState('idle');
+            startTransition(() => { void handleExport(); });
+          }}
         >
-          Exportar JSON
+          {EXPORT_LABELS[exportState]}
         </button>
       </section>
 

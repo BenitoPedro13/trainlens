@@ -1,9 +1,10 @@
 import { auth } from '@/auth';
-import { getZones } from '@/lib/api-client';
+import { getZones, getPaceHistogram } from '@/lib/api-client';
 import { resolveDateRange } from '@/lib/analytics-dates';
 import { AnalyticsDateFilter } from '@/components/analytics-date-filter';
 import { AnalyticsSportFilter } from '@/components/analytics-sport-filter';
 import { ZoneBars } from '@/components/charts/zone-bars';
+import { PaceHistogramChart } from '@/components/charts/pace-histogram-chart';
 
 export default async function ZonesPage({
   searchParams,
@@ -16,11 +17,10 @@ export default async function ZonesPage({
   const { from, to } = resolveDateRange(searchParams);
   const activityType = searchParams.activityType;
 
-  const zones = await getZones(
-    userId,
-    { from, to, ...(activityType ? { activityType } : {}) },
-    email,
-  );
+  const [zones, histogram] = await Promise.all([
+    getZones(userId, { from, to, ...(activityType ? { activityType } : {}) }, email),
+    getPaceHistogram(userId, { from, to, ...(activityType ? { activityType } : {}) }, email),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -44,10 +44,20 @@ export default async function ZonesPage({
           <ZoneBars data={zones.heartRate} valueKey="percentOfTotal" unit="%" />
         </section>
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-gray-900">Ritmo</h2>
+          <h2 className="mb-4 text-sm font-semibold text-gray-900">Ritmo (zonas)</h2>
           <ZoneBars data={zones.pace} valueKey="percentOfTotal" unit="%" />
         </section>
       </div>
+
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold text-gray-900">Distribuição de ritmo</h2>
+          {histogram.activityCount > 0 && (
+            <span className="text-xs text-gray-400">{histogram.activityCount} atividades</span>
+          )}
+        </div>
+        <PaceHistogramChart bins={histogram.bins} />
+      </section>
     </div>
   );
 }

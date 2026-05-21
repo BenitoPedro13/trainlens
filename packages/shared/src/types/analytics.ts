@@ -122,6 +122,20 @@ export interface AnalyticsSummaryResponse extends ActivitySummary {
   acuteChronicRatio: number;
 }
 
+export interface PaceHistogramBin {
+  label: string;
+  minSecondsPerKm: number;
+  maxSecondsPerKm: number;
+  count: number;
+  totalDurationSeconds: number;
+  totalDistanceMeters: number;
+}
+
+export interface PaceHistogramResponse {
+  bins: PaceHistogramBin[];
+  activityCount: number;
+}
+
 export interface ActivityListItem {
   id: string;
   externalId: string;

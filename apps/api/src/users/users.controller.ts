@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { TrainingSettings } from '@trainlens/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -42,8 +42,18 @@ export class UsersController {
   }
 
   @Post('export')
-  exportData(@CurrentUser() user: RequestUser) {
-    return this.users.exportUserData(user.userId);
+  requestExport(@CurrentUser() user: RequestUser) {
+    return this.users.requestExport(user.userId);
+  }
+
+  @Get('export/:jobId')
+  getExportStatus(@CurrentUser() user: RequestUser, @Param('jobId') jobId: string) {
+    return this.users.getExportStatus(user.userId, jobId);
+  }
+
+  @Get('export/:jobId/download')
+  downloadExport(@CurrentUser() user: RequestUser, @Param('jobId') jobId: string) {
+    return this.users.downloadExport(user.userId, jobId);
   }
 
   @Delete()

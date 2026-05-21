@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.100.11",
+    "@tanstack/react-query-devtools": "^5.100.11",
     "@trainlens/database": "workspace:*",
     "@trainlens/shared": "workspace:*",
     "@trainlens/ui": "workspace:*",

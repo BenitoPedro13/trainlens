@@ -3,6 +3,7 @@ export const QUEUE_NAMES = {
   ACTIVITY_SYNC: 'activity-sync',
   WEBHOOK_INGEST: 'webhook-ingest',
   ANALYTICS_RECALC: 'analytics-recalc',
+  DATA_EXPORT: 'data-export',
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -30,4 +31,9 @@ export interface AnalyticsRecalcJobData {
   userId: string;
   /** ISO date string (YYYY-MM-DD) — recalculate from this date forward */
   fromDate: string;
+}
+
+export interface DataExportJobData {
+  userId: string;
+  exportJobId: string;
 }

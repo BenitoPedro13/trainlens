@@ -20,6 +20,8 @@ export type { Connection, ConnectionStatus } from './types/connection.js';
 export type {
   ActivitySummary,
   AnalyticsSummaryResponse,
+  PaceHistogramBin,
+  PaceHistogramResponse,
   ActivityListItem,
   ActivityDetailResponse,
   PaginatedActivitiesResponse,

@@ -37,6 +37,7 @@ function parseRedisUrl(url: string) {
       { name: QUEUE_NAMES.ACTIVITY_SYNC },
       { name: QUEUE_NAMES.WEBHOOK_INGEST },
       { name: QUEUE_NAMES.ANALYTICS_RECALC },
+      { name: QUEUE_NAMES.DATA_EXPORT, defaultJobOptions: { attempts: 2 } },
     ),
   ],
   exports: [BullModule],

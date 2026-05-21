@@ -96,13 +96,18 @@ export class WebhookIngestProcessor extends WorkerHost {
     const authorized = payload.updates?.['authorized'];
     if (payload.aspect_type === 'update' && authorized === 'false') {
       await this.db.client.connection
-        .delete({
+        .update({
           where: { userId_provider: { userId, provider: 'strava' } },
+          data: {
+            status: 'revoked',
+            syncErrorMessage:
+              'O acesso ao Strava foi revogado. Acesse Configurações para reconectar.',
+          },
         })
         .catch(() => {
           /* connection may already be removed */
         });
-      this.logger.log(`Strava connection removed for user ${userId} (deauthorize)`);
+      this.logger.log(`Strava connection revoked for user ${userId} (deauthorize webhook)`);
     }
 
     await this.db.client.webhookEvent.update({

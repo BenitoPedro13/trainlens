@@ -40,9 +40,9 @@ export async function SyncStatusBanner({
       {status.syncErrorMessage && (
         <p className="mt-1 text-xs">{status.syncErrorMessage}</p>
       )}
-      {!status.connected && status.status === 'disconnected' && (
+      {!status.connected && (status.status === 'disconnected' || status.status === 'revoked') && (
         <p className="mt-1 text-xs">
-          Conecte o Strava em{' '}
+          {status.status === 'revoked' ? 'Reconecte o Strava em' : 'Conecte o Strava em'}{' '}
           <a href="/settings" className="font-medium text-orange-600 hover:underline">
             Configurações
           </a>

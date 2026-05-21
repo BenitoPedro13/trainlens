@@ -4,12 +4,15 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import type { Queue } from 'bullmq';
 import { StravaAdapter } from '../strava/strava.adapter';
 import { ConnectionTokensService } from '../sync/connection-tokens.service';
 import { DatabaseService } from '../database/database.service';
 import { CacheService } from '../cache/cache.service';
 import type { AthleteThresholds, TrainingSettings } from '@trainlens/shared';
 import { resolveAthleteThresholds } from '@trainlens/shared';
+import { QUEUE_NAMES, type DataExportJobData } from '../queue/queue.constants';
 
 export interface SyncStatusResponse {
   provider: 'strava';
@@ -28,6 +31,7 @@ export class UsersService {
     private readonly tokens: ConnectionTokensService,
     private readonly strava: StravaAdapter,
     private readonly cache: CacheService,
+    @InjectQueue(QUEUE_NAMES.DATA_EXPORT) private readonly exportQueue: Queue<DataExportJobData>,
   ) {}
 
   async getTrainingSettings(userId: string): Promise<TrainingSettings> {
@@ -145,48 +149,58 @@ export class UsersService {
     await this.invalidateUserCaches(userId);
   }
 
-  async exportUserData(userId: string): Promise<Record<string, unknown>> {
+  async requestExport(userId: string): Promise<{ exportJobId: string }> {
+    const job = await this.db.client.exportJob.create({
+      data: { userId, status: 'pending' },
+    });
+    await this.exportQueue.add('export', { userId, exportJobId: job.id });
+    return { exportJobId: job.id };
+  }
+
+  async getExportStatus(
+    userId: string,
+    exportJobId: string,
+  ): Promise<{ status: string; expiresAt: string | null; errorMessage: string | null }> {
+    const job = await this.db.client.exportJob.findFirst({
+      where: { id: exportJobId, userId },
+    });
+    if (!job) throw new NotFoundException('Export job not found');
+    return {
+      status: job.status,
+      expiresAt: job.expiresAt?.toISOString() ?? null,
+      errorMessage: job.errorMessage,
+    };
+  }
+
+  async downloadExport(userId: string, exportJobId: string): Promise<Record<string, unknown>> {
+    const job = await this.db.client.exportJob.findFirst({
+      where: { id: exportJobId, userId, status: 'ready' },
+    });
+    if (!job) throw new NotFoundException('Export not ready or expired');
+    if (job.expiresAt && job.expiresAt < new Date()) {
+      throw new BadRequestException('Export has expired — request a new one');
+    }
+
     const user = await this.db.client.user.findUnique({
       where: { id: userId },
       select: {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
+        id: true, email: true, name: true, createdAt: true,
         connections: {
-          select: {
-            provider: true,
-            status: true,
-            externalAthleteId: true,
-            lastSyncedAt: true,
-            createdAt: true,
-          },
+          select: { provider: true, status: true, externalAthleteId: true, lastSyncedAt: true, createdAt: true },
         },
       },
     });
-
     if (!user) throw new NotFoundException('User not found');
 
     const [activities, dailyMetrics] = await Promise.all([
-      this.db.client.activity.findMany({
-        where: { userId, deletedAt: null },
-        orderBy: { startedAt: 'desc' },
-      }),
-      this.db.client.dailyMetrics.findMany({
-        where: { userId },
-        orderBy: { date: 'asc' },
-      }),
+      this.db.client.activity.findMany({ where: { userId, deletedAt: null }, orderBy: { startedAt: 'desc' } }),
+      this.db.client.dailyMetrics.findMany({ where: { userId }, orderBy: { date: 'asc' } }),
     ]);
 
     return {
       version: 1,
-      exportedAt: new Date().toISOString(),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        createdAt: user.createdAt.toISOString(),
-      },
+      exportedAt: job.completedAt?.toISOString() ?? new Date().toISOString(),
+      user: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt.toISOString() },
       connections: user.connections,
       activities: activities.map((a) => ({
         ...a,
@@ -195,10 +209,7 @@ export class UsersService {
         updatedAt: a.updatedAt.toISOString(),
         deletedAt: a.deletedAt?.toISOString() ?? null,
       })),
-      dailyMetrics: dailyMetrics.map((m) => ({
-        ...m,
-        date: m.date.toISOString().slice(0, 10),
-      })),
+      dailyMetrics: dailyMetrics.map((m) => ({ ...m, date: m.date.toISOString().slice(0, 10) })),
     };
   }
 

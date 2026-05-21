@@ -5,6 +5,7 @@ import type {
   BestEffortProgressionResponse,
   BestEffortsResponse,
   HeartRateZone,
+  PaceHistogramResponse,
   TrainingLoadResponse,
   YearOverYearResponse,
   ZonesResponse,
@@ -354,6 +355,68 @@ export class AnalyticsService {
       mode,
       points: computeYearOverYear(activities, mode),
     };
+  }
+
+  async getPaceHistogram(
+    userId: string,
+    from?: string,
+    to?: string,
+    activityType?: string,
+  ): Promise<PaceHistogramResponse> {
+    const toDate = to ? new Date(`${to}T23:59:59.999Z`) : new Date();
+    const fromDate = from
+      ? new Date(`${from}T00:00:00.000Z`)
+      : new Date(toDate.getTime() - 365 * 86_400_000);
+
+    const activities = await this.db.client.activity.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        startedAt: { gte: fromDate, lte: toDate },
+        averagePaceSecondsPerKm: { not: null },
+        ...(activityType ? { activityType: activityType as never } : {}),
+      },
+      select: {
+        averagePaceSecondsPerKm: true,
+        durationSeconds: true,
+        distanceMeters: true,
+      },
+    });
+
+    const BINS: Array<{ label: string; min: number; max: number }> = [
+      { label: '<3:30/km', min: 0, max: 210 },
+      { label: '3:30–4:00', min: 210, max: 240 },
+      { label: '4:00–4:30', min: 240, max: 270 },
+      { label: '4:30–5:00', min: 270, max: 300 },
+      { label: '5:00–5:30', min: 300, max: 330 },
+      { label: '5:30–6:00', min: 330, max: 360 },
+      { label: '6:00–7:00', min: 360, max: 420 },
+      { label: '7:00–8:00', min: 420, max: 480 },
+      { label: '8:00–10:00', min: 480, max: 600 },
+      { label: '>10:00/km', min: 600, max: Infinity },
+    ];
+
+    const bins = BINS.map((b) => ({
+      label: b.label,
+      minSecondsPerKm: b.min,
+      maxSecondsPerKm: b.max === Infinity ? 99999 : b.max,
+      count: 0,
+      totalDurationSeconds: 0,
+      totalDistanceMeters: 0,
+    }));
+
+    for (const a of activities) {
+      const pace = a.averagePaceSecondsPerKm!;
+      const binIdx = BINS.findIndex((b) => pace >= b.min && pace < b.max);
+      const bin = bins[binIdx];
+      if (binIdx !== -1 && bin) {
+        bin.count++;
+        bin.totalDurationSeconds += a.durationSeconds;
+        bin.totalDistanceMeters += a.distanceMeters ?? 0;
+      }
+    }
+
+    return { bins: bins.filter((b) => b.count > 0 || false), activityCount: activities.length };
   }
 
   private async ensureMetrics(userId: string): Promise<void> {

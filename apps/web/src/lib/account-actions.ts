@@ -26,13 +26,30 @@ export async function disconnectStrava(deleteActivities: boolean) {
   if (!res.ok) throw new Error(await res.text());
 }
 
-/** Returns pretty-printed JSON for client-side download. */
-export async function exportAccountData(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error('Not authenticated');
-  const token = await createApiAccessToken(session.user.id, session.user.email);
+export async function requestExport(): Promise<{ exportJobId: string }> {
+  const token = await apiToken();
   const res = await fetch(`${API_URL}/api/v1/users/me/export`, {
     method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ exportJobId: string }>;
+}
+
+export async function getExportStatus(
+  exportJobId: string,
+): Promise<{ status: string; expiresAt: string | null; errorMessage: string | null }> {
+  const token = await apiToken();
+  const res = await fetch(`${API_URL}/api/v1/users/me/export/${exportJobId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ status: string; expiresAt: string | null; errorMessage: string | null }>;
+}
+
+export async function downloadExport(exportJobId: string): Promise<string> {
+  const token = await apiToken();
+  const res = await fetch(`${API_URL}/api/v1/users/me/export/${exportJobId}/download`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(await res.text());
